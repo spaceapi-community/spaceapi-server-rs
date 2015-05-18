@@ -1,0 +1,15 @@
+[package]
+name = "spaceapi_server"
+version = "0.1.0"
+authors = [
+    "Raphael Nestler <raphael.nestler@gmail.com>",
+    "Danilo Bargen <mail@dbrgn.ch>",
+]
+
+[dependencies]
+redis = "0.3"
+hyper = "0.3"
+rustc-serialize = "0.3"
+
+[dependencies.spaceapi]
+path = "../spaceapi"
