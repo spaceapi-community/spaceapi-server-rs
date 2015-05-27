@@ -4,7 +4,7 @@
 //! own favorite port by exporting the `PORT` environment variable.
 
 extern crate rustc_serialize;
-extern crate hyper;
+extern crate iron;
 extern crate spaceapi;
 
 mod utils;
@@ -13,11 +13,8 @@ use std::io::Write;
 use std::net::Ipv4Addr;
 
 use rustc_serialize::json::ToJson;
-use hyper::Server;
-use hyper::server::Request;
-use hyper::server::Response;
-use hyper::net::Fresh;
-use hyper::header;
+use iron::{Chain, Request, Response, IronResult, IronError, Iron};
+use iron::status;
 
 use spaceapi::datastore::DataStore;
 use spaceapi::redis_store::RedisStore;
@@ -120,7 +117,7 @@ fn build_response_json(people_present: Option<u32>, raspi_temperature: Option<f3
     status.to_json().to_string()
 }
 
-fn status_endpoint(_: Request, mut res: Response<Fresh>) {
+fn status_endpoint(_: &mut Request) -> IronResult<Response> {
     // Fetch data from datastore
     let datastore = RedisStore::new().unwrap();
     let people_present: Option<u32> = match datastore.retrieve("people_present") {
@@ -140,10 +137,10 @@ fn status_endpoint(_: Request, mut res: Response<Fresh>) {
 
     // Get response body
     let body = build_response_json(people_present, raspi_temperature);
-    let body_bytes = body.as_bytes();
 
     // Set headers
     // A new scope is used here because of the mutable borrow.
+    /*
     {
         let mut headers = res.headers_mut();
         headers.set(header::ContentLength(body_bytes.len() as u64));
@@ -151,12 +148,10 @@ fn status_endpoint(_: Request, mut res: Response<Fresh>) {
         headers.set(header::CacheControl(vec![header::CacheDirective::NoCache]));
         headers.set(header::AccessControlAllowOrigin::Any);
     }
+    */
 
     // Write response body
-    let mut stream = res.start().unwrap();
-    stream.write_all(body_bytes).unwrap();
-
-    stream.end().unwrap();
+    Ok(Response::with((status::Ok, body)))
 }
 
 
@@ -178,7 +173,7 @@ impl SpaceapiServer {
 
     pub fn serve(&self) {
         println!("Starting HTTP server on {}:{}...", self.host, self.port);
-        Server::http(status_endpoint).listen((self.host, self.port)).unwrap();
+        Iron::new(status_endpoint).http((self.host, self.port)).unwrap();
     }
 
 }
