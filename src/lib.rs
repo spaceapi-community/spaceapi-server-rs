@@ -13,8 +13,9 @@ use std::io::Write;
 use std::net::Ipv4Addr;
 
 use rustc_serialize::json::ToJson;
-use iron::{Chain, Request, Response, IronResult, IronError, Iron};
-use iron::status;
+use iron::{Chain, Request, Response, IronResult, IronError, Iron, Set};
+use iron::{status, headers};
+use iron::modifiers::Header;
 
 use spaceapi::datastore::DataStore;
 use spaceapi::redis_store::RedisStore;
@@ -138,20 +139,15 @@ fn status_endpoint(_: &mut Request) -> IronResult<Response> {
     // Get response body
     let body = build_response_json(people_present, raspi_temperature);
 
-    // Set headers
-    // A new scope is used here because of the mutable borrow.
-    /*
-    {
-        let mut headers = res.headers_mut();
-        headers.set(header::ContentLength(body_bytes.len() as u64));
-        headers.set(header::ContentType("application/json; charset=utf-8".parse().unwrap()));
-        headers.set(header::CacheControl(vec![header::CacheDirective::NoCache]));
-        headers.set(header::AccessControlAllowOrigin::Any);
-    }
-    */
+    // Create response
+    let mut response = Response::with((status::Ok, body));
 
-    // Write response body
-    Ok(Response::with((status::Ok, body)))
+    // Set headers
+    response.set_mut(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())));
+    response.set_mut(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])));
+    response.set_mut(Header(headers::AccessControlAllowOrigin::Any));
+
+    Ok(response)
 }
 
 
