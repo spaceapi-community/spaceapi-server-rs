@@ -10,6 +10,7 @@ authors = [
 redis = "0.3"
 hyper = "0.3"
 rustc-serialize = "0.3"
+iron = "0.1.18"
 
 [dependencies.spaceapi]
 path = "../spaceapi"
