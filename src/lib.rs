@@ -8,6 +8,8 @@ extern crate iron;
 extern crate spaceapi;
 
 mod utils;
+mod datastore;
+mod redis_store;
 
 use std::io::Write;
 use std::net::Ipv4Addr;
@@ -17,8 +19,8 @@ use iron::{Chain, Request, Response, IronResult, IronError, Iron, Set};
 use iron::{status, headers};
 use iron::modifiers::Header;
 
-use spaceapi::datastore::DataStore;
-use spaceapi::redis_store::RedisStore;
+use self::datastore::DataStore;
+use self::redis_store::RedisStore;
 use spaceapi::Optional::{Value, Absent};
 
 
