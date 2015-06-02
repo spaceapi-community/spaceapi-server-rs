@@ -11,11 +11,10 @@ mod utils;
 mod datastore;
 mod redis_store;
 
-use std::io::Write;
 use std::net::Ipv4Addr;
 
 use rustc_serialize::json::ToJson;
-use iron::{Chain, Request, Response, IronResult, IronError, Iron, Set};
+use iron::{Request, Response, IronResult, Iron, Set};
 use iron::{status, headers};
 use iron::modifiers::Header;
 
