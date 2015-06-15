@@ -8,18 +8,19 @@ extern crate iron;
 extern crate spaceapi;
 
 mod utils;
-mod datastore;
-mod redis_store;
+pub mod datastore;
+pub mod redis_store;
 
 use std::net::Ipv4Addr;
+use std::sync::Mutex;
+use std::sync::Arc;
 
 use rustc_serialize::json::ToJson;
 use iron::{Request, Response, IronResult, Iron, Set};
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
 
-use self::datastore::DataStore;
-use self::redis_store::RedisStore;
+pub use datastore::DataStore;
 use spaceapi::Optional::{Value, Absent};
 
 
@@ -120,19 +121,22 @@ fn build_response_json(people_present: Option<u32>, raspi_temperature: Option<f3
 }
 
 
+
 pub struct SpaceapiServer {
     host: Ipv4Addr,
     port: u16,
     status: spaceapi::Status,
+    datastore: Arc<Mutex<Box<DataStore>>>,
 }
 
 impl SpaceapiServer {
 
-    pub fn new(host: Ipv4Addr, status: spaceapi::Status) -> SpaceapiServer {
+    pub fn new(host: Ipv4Addr, status: spaceapi::Status, datastore: Arc<Mutex<Box<DataStore>>>) -> SpaceapiServer{
         SpaceapiServer {
             host: host,
             port: utils::get_port(),
             status: status,
+            datastore: datastore,
         }
     }
 
@@ -150,15 +154,16 @@ impl middleware::Handler for SpaceapiServer {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
 
         // Fetch data from datastore
-        let datastore = RedisStore::new().unwrap();
-        let people_present: Option<u32> = match datastore.retrieve("people_present") {
+        let datastore_clone= self.datastore.clone();
+        let datastore_lock = datastore_clone.lock().unwrap();
+        let people_present: Option<u32> = match datastore_lock.retrieve("people_present") {
             Ok(v) => match v.parse::<u32>() {
                 Ok(i) => Some(i),
                 Err(_) => None,
             },
             Err(_) => None,
         };
-        let raspi_temperature: Option<f32> = match datastore.retrieve("raspi_temperature") {
+        let raspi_temperature: Option<f32> = match datastore_lock.retrieve("raspi_temperature") {
             Ok(v) => match v.parse::<f32>() {
                 Ok(i) => Some(i),
                 Err(_) => None,
@@ -178,9 +183,7 @@ impl middleware::Handler for SpaceapiServer {
         response.set_mut(Header(headers::AccessControlAllowOrigin::Any));
 
         Ok(response)
-
     }
-
 }
 
 

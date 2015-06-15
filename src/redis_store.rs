@@ -10,13 +10,6 @@ pub struct RedisStore {
     client : Client,
 }
 
-impl RedisStore {
-    pub fn new() -> Result<RedisStore, DataStoreError> {
-        let redis_client = try!(Client::open("redis://127.0.0.1/"));
-        Ok(RedisStore { client: redis_client })
-    }
-}
-
 /// Implement the DataStore methods for Redis
 impl DataStore for RedisStore {
 
@@ -39,6 +32,13 @@ impl DataStore for RedisStore {
         Ok(try!(con.del(key)))
     }
 
+}
+
+impl RedisStore {
+    pub fn new() -> Result<RedisStore, DataStoreError> {
+        let redis_client = try!(Client::open("redis://127.0.0.1/"));
+        Ok(RedisStore { client: redis_client })
+    }
 }
 
 #[cfg(test)]
