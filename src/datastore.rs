@@ -10,20 +10,15 @@ pub trait DataStore : Send {
     fn delete(&self, key: &str) -> Result<(), DataStoreError>;
 }
 
-/// A struct representing a datastore error.
+/// An enum representing a datastore error.
 #[derive(Debug)]
-pub struct DataStoreError {
-    pub repr: ErrorKind,
-}
-
-/// An enum containing all possible error kinds.
-#[derive(Debug)]
-pub enum ErrorKind {
+pub enum DataStoreError {
     RedisError(redis::RedisError),
 }
 
 impl From<redis::RedisError> for DataStoreError {
     fn from(err: redis::RedisError) -> DataStoreError {
-        DataStoreError { repr: ErrorKind::RedisError(err) }
+        DataStoreError::RedisError(err)
     }
 }
+
