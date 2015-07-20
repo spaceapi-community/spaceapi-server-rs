@@ -7,7 +7,6 @@ extern crate rustc_serialize;
 extern crate iron;
 extern crate spaceapi;
 
-mod utils;
 pub mod datastore;
 pub mod redis_store;
 
@@ -131,10 +130,10 @@ pub struct SpaceapiServer {
 
 impl SpaceapiServer {
 
-    pub fn new(host: Ipv4Addr, status: spaceapi::Status, datastore: Arc<Mutex<Box<DataStore>>>) -> SpaceapiServer{
+    pub fn new(host: Ipv4Addr, port: u16, status: spaceapi::Status, datastore: Arc<Mutex<Box<DataStore>>>) -> SpaceapiServer{
         SpaceapiServer {
             host: host,
-            port: utils::get_port(),
+            port: port,
             status: status,
             datastore: datastore,
         }
