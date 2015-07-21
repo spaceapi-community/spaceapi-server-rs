@@ -62,6 +62,15 @@ fn build_response_json(status: &spaceapi::Status, people_present: Option<u32>, r
 }
 
 
+/// A specification of a sensor.
+///
+/// The ``sensor`` field contains the static data of a sensor and the
+/// ``data_key`` says how to find the sensor value in the datastore.
+pub struct SensorSpec {
+    sensor: spaceapi::SensorTemplate,
+    data_key: String,
+}
+
 /// A Space API server instance.
 ///
 /// You can create a new instance using the ``new`` constructor method by
@@ -74,24 +83,39 @@ pub struct SpaceapiServer {
     port: u16,
     status: spaceapi::Status,
     datastore: Arc<Mutex<Box<DataStore>>>,
+    sensors: Vec<SensorSpec>
 }
 
 impl SpaceapiServer {
 
-    pub fn new(host: Ipv4Addr, port: u16, status: spaceapi::Status, datastore: Arc<Mutex<Box<DataStore>>>) -> SpaceapiServer{
+    pub fn new(host: Ipv4Addr, port: u16, status: spaceapi::Status, datastore: Arc<Mutex<Box<DataStore>>>) -> SpaceapiServer {
         SpaceapiServer {
             host: host,
             port: port,
             status: status,
             datastore: datastore,
+            sensors: vec![],
         }
     }
 
+    /// Start a HTTP server listening on ``self.host:self.port``.
+    ///
+    /// This call is blocking. It can be interrupted with SIGINT (Ctrl+C).
     pub fn serve(self) {
         let host = self.host;
         let port = self.port;
         println!("Starting HTTP server on http://{}:{}...", host, port);
         Iron::new(self).http((host, port)).unwrap();
+    }
+
+    /// Register a new sensor.
+    ///
+    /// The first argument is a ``spaceapi::Sensor`` instance containing all static data. The
+    /// second argument specifies how to get the actual sensor value from the datastore.
+    pub fn register_sensor(&mut self, sensor: spaceapi::SensorTemplate, data_key: String) {
+        self.sensors.push(
+            SensorSpec { sensor: sensor, data_key: data_key }
+        );
     }
 
 }
