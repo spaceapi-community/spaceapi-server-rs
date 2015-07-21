@@ -23,7 +23,7 @@ pub use datastore::DataStore;
 use spaceapi::Optional::{Value, Absent};
 
 
-fn build_response_json(people_present: Option<u32>, raspi_temperature: Option<f32>) -> String {
+fn build_response_json(status: &spaceapi::Status, people_present: Option<u32>, raspi_temperature: Option<f32>) -> String {
     let people_present_sensor = match people_present {
         Some(count) => Value(vec![
             spaceapi::PeopleNowPresentSensor {
@@ -50,73 +50,15 @@ fn build_response_json(people_present: Option<u32>, raspi_temperature: Option<f3
         None => Absent,
     };
 
-    let status = spaceapi::Status {
+    // Create a mutable copy of the status struct and add sensor data.
+    let mut status_copy = (*status).clone();
+    status_copy.sensors = Value(spaceapi::Sensors {
+        people_now_present: people_present_sensor,
+        temperature: temperature_sensor,
+    });
 
-        // Hackerspace properties
-        api: "0.13".to_string(),
-        space: "coredump".to_string(),
-        logo: "https://www.coredump.ch/logo.png".to_string(),
-        url: "https://www.coredump.ch/".to_string(),
-        location: spaceapi::Location {
-            address: Value("Spinnereistrasse 2, 8640 Rapperswil, Switzerland".to_string()),
-            lat: 47.22936,
-            lon: 8.82949,
-        },
-        contact: spaceapi::Contact {
-            irc: Value("irc://freenode.net/#coredump".to_string()),
-            twitter: Value("@coredump_ch".to_string()),
-            foursquare: Value("525c20e5498e875d8231b1e5".to_string()),
-            email: Value("danilo@coredump.ch".to_string()),
-        },
-
-        // Hackerspace features / projects
-        spacefed: Value(spaceapi::Spacefed {
-            spacenet: false,
-            spacesaml: false,
-            spacephone: false,
-        }),
-        projects: Value(vec![
-            "https://www.coredump.ch/projekte/".to_string(),
-            "https://discourse.coredump.ch/c/projects".to_string(),
-            "https://github.com/coredump-ch/".to_string(),
-        ]),
-        cam: Absent,
-        feeds: Value(spaceapi::Feeds {
-            blog: Value(spaceapi::Feed {
-                _type: Value("rss".to_string()),
-                url: "https://www.coredump.ch/feed/".to_string(),
-            }),
-            wiki: Absent,
-            calendar: Absent,
-            flickr: Absent,
-        }),
-        events: Absent,
-        radio_show: Absent,
-
-        // SpaceAPI internal usage
-        cache: Value(spaceapi::Cache {
-            schedule: "m.02".to_string(),
-        }),
-        issue_report_channels: vec![
-            "email".to_string(),
-            "twitter".to_string(),
-        ],
-
-        // Mutable data
-        state: spaceapi::State {
-            open: Some(false),
-            message: Value("Open every Monday from 20:00".to_string()),
-            lastchange: Absent,
-            trigger_person: Absent,
-            icon: Absent,
-        },
-        sensors: Value(spaceapi::Sensors {
-            people_now_present: people_present_sensor,
-            temperature: temperature_sensor,
-        }),
-
-    };
-    status.to_json().to_string()
+    // Serialize to JSON string
+    status_copy.to_json().to_string()
 }
 
 
@@ -159,7 +101,7 @@ impl middleware::Handler for SpaceapiServer {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
 
         // Fetch data from datastore
-        let datastore_clone= self.datastore.clone();
+        let datastore_clone = self.datastore.clone();
         let datastore_lock = datastore_clone.lock().unwrap();
         let people_present: Option<u32> = match datastore_lock.retrieve("people_present") {
             Ok(v) => match v.parse::<u32>() {
@@ -177,7 +119,7 @@ impl middleware::Handler for SpaceapiServer {
         };
 
         // Get response body
-        let body = build_response_json(people_present, raspi_temperature);
+        let body = build_response_json(&self.status, people_present, raspi_temperature);
 
         // Create response
         let mut response = Response::with((status::Ok, body));
