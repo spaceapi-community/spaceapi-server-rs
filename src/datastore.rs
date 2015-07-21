@@ -1,9 +1,10 @@
 extern crate redis;
 
+#[doc(no_inline)]
 pub use self::redis::{RedisError};
 
 
-/// A DataStore needs to implement store and retrieve methods.
+/// A ``DataStore`` needs to implement ``store`` and ``retrieve`` methods.
 pub trait DataStore : Send {
     fn store(&self, key: &str, value: &str) -> Result<(), DataStoreError>;
     fn retrieve(&self, key: &str) -> Result<String, DataStoreError>;

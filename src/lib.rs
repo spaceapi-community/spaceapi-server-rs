@@ -1,4 +1,4 @@
-//! The main entry point for the SpaceAPi server.
+//! The main entry point for the Space API server.
 //!
 //! Running this code starts a HTTP server instance. The default port is 3000, but you can set your
 //! own favorite port by exporting the `PORT` environment variable.
@@ -120,7 +120,13 @@ fn build_response_json(people_present: Option<u32>, raspi_temperature: Option<f3
 }
 
 
-
+/// A Space API server instance.
+///
+/// You can create a new instance using the ``new`` constructor method by
+/// passing it the host, the port, the ``Status`` object and a datastore.
+///
+/// The ``SpaceapiServer`` includes a web server through
+/// [Hyper](http://hyper.rs/hyper/hyper/server/index.html). Simply call the ``serve`` method.
 pub struct SpaceapiServer {
     host: Ipv4Addr,
     port: u16,
