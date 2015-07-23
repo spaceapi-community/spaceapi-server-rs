@@ -20,7 +20,7 @@ use iron::{status, headers, middleware};
 use iron::modifiers::Header;
 
 pub use datastore::DataStore;
-use spaceapi::Optional::{Value, Absent};
+use spaceapi::utils::Optional;
 use spaceapi::SensorTemplate::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
 
 
@@ -178,14 +178,14 @@ impl SpaceapiServer {
         }
 
         // Add sensors to status object
-        status_copy.sensors = Value(spaceapi::Sensors {
+        status_copy.sensors = Optional::Value(spaceapi::Sensors {
             people_now_present: match people_now_present_sensors.is_empty() {
-                true => Absent,
-                false => Value(people_now_present_sensors),
+                true => Optional::Absent,
+                false => Optional::Value(people_now_present_sensors),
             },
             temperature: match temperature_sensors.is_empty() {
-                true => Absent,
-                false => Value(temperature_sensors),
+                true => Optional::Absent,
+                false => Optional::Value(temperature_sensors),
             },
         });
 
