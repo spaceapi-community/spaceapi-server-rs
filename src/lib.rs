@@ -11,8 +11,7 @@ pub mod datastore;
 pub mod redis_store;
 
 use std::net::Ipv4Addr;
-use std::sync::Mutex;
-use std::sync::Arc;
+use std::sync::{Mutex, Arc};
 
 use rustc_serialize::json::{Json, ToJson};
 use iron::{Request, Response, IronResult, Iron, Set};
@@ -113,28 +112,11 @@ impl SpaceapiServer {
 
             // Get access to datastore
             let datastore_clone = self.datastore.clone();
-            let datastore_lock = datastore_clone.lock().unwrap();
 
             // Add sensor data
             for sensor_spec in &self.sensors {
 
-                // Retrieve sensor value
-                let value: Option<SensorValue> = match datastore_lock.retrieve(&sensor_spec.data_key) {
-                    Ok(v) => {
-                        match sensor_spec.data_type {
-                            SensorValueType::Float => match v.parse::<f64>() {
-                                Ok(i) => Some(SensorValue::Float(i)),
-                                Err(_) => None,
-                            },
-                            SensorValueType::Int => match v.parse::<i64>() {
-                                Ok(i) => Some(SensorValue::Int(i)),
-                                Err(_) => None,
-                            },
-                            SensorValueType::Bool => None,  // TODO
-                        }
-                    },
-                    Err(_) => None,
-                };
+                let value = sensor_spec.get_sensor_value(&datastore_clone);
 
                 // If value is available, save sensor data
                 if value.is_some() {
@@ -195,6 +177,35 @@ impl SpaceapiServer {
 
 }
 
+trait SensorDataFetcher {
+    fn get_sensor_value(&self, datastore: &Arc<Mutex<Box<DataStore>>>) -> Option<SensorValue>;
+}
+
+impl SensorDataFetcher for SensorSpec {
+
+    /// Retrieve sensor value from the datastore.
+    fn get_sensor_value(&self, datastore: &Arc<Mutex<Box<DataStore>>>) -> Option<SensorValue> {
+        let datastore_lock = datastore.lock().unwrap();
+        match datastore_lock.retrieve(&self.data_key) {
+            Ok(v) => {
+                match self.data_type {
+                    SensorValueType::Float => match v.parse::<f64>() {
+                        Ok(i) => Some(SensorValue::Float(i)),
+                        Err(_) => None,
+                    },
+                    SensorValueType::Int => match v.parse::<i64>() {
+                        Ok(i) => Some(SensorValue::Int(i)),
+                        Err(_) => None,
+                    },
+                    SensorValueType::Bool => None,  // TODO
+                }
+            },
+            Err(_) => None,
+        }
+    }
+
+}
+
 impl middleware::Handler for SpaceapiServer {
 
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
@@ -222,7 +233,7 @@ mod test {
     use std::net::Ipv4Addr;
     use std::sync::{Mutex,Arc};
     use rustc_serialize::json::Json;
-    use spaceapi::Optional;
+    use spaceapi::utils::Optional;
     use super::SpaceapiServer;
     use super::datastore::DataStore;
     use super::redis_store::RedisStore;
