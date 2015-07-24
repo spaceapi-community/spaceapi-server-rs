@@ -50,6 +50,9 @@ pub enum SensorValue {
     Bool(bool),
 }
 
+/// A datastore wrapped in an Arc, a Mutex and a Box. Safe for use in multithreaded situations.
+pub type SafeDataStore = Arc<Mutex<Box<DataStore>>>;
+
 /// A Space API server instance.
 ///
 /// You can create a new instance using the ``new`` constructor method by
@@ -61,13 +64,13 @@ pub struct SpaceapiServer {
     host: Ipv4Addr,
     port: u16,
     status: spaceapi::Status,
-    datastore: Arc<Mutex<Box<DataStore>>>,
+    datastore: SafeDataStore,
     sensors: Vec<SensorSpec>
 }
 
 impl SpaceapiServer {
 
-    pub fn new(host: Ipv4Addr, port: u16, status: spaceapi::Status, datastore: Arc<Mutex<Box<DataStore>>>) -> SpaceapiServer {
+    pub fn new(host: Ipv4Addr, port: u16, status: spaceapi::Status, datastore: SafeDataStore) -> SpaceapiServer {
         SpaceapiServer {
             host: host,
             port: port,
@@ -178,13 +181,13 @@ impl SpaceapiServer {
 }
 
 trait SensorDataFetcher {
-    fn get_sensor_value(&self, datastore: &Arc<Mutex<Box<DataStore>>>) -> Option<SensorValue>;
+    fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<SensorValue>;
 }
 
 impl SensorDataFetcher for SensorSpec {
 
     /// Retrieve sensor value from the datastore.
-    fn get_sensor_value(&self, datastore: &Arc<Mutex<Box<DataStore>>>) -> Option<SensorValue> {
+    fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<SensorValue> {
         let datastore_lock = datastore.lock().unwrap();
         match datastore_lock.retrieve(&self.data_key) {
             Ok(v) => {
