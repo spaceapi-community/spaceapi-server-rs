@@ -113,13 +113,10 @@ impl SpaceapiServer {
         // Process registered sensors
         if !self.sensors.is_empty() {
 
-            // Get access to datastore
-            let datastore_clone = self.datastore.clone();
-
             // Add sensor data
             for sensor_spec in &self.sensors {
 
-                let value = sensor_spec.get_sensor_value(&datastore_clone);
+                let value = sensor_spec.get_sensor_value(&self.datastore);
 
                 // If value is available, save sensor data
                 if value.is_some() {
@@ -188,7 +185,8 @@ impl SensorDataFetcher for SensorSpec {
 
     /// Retrieve sensor value from the datastore.
     fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<SensorValue> {
-        let datastore_lock = datastore.lock().unwrap();
+        let datastore_clone = datastore.clone();
+        let datastore_lock = datastore_clone.lock().unwrap();
         match datastore_lock.retrieve(&self.data_key) {
             Ok(v) => {
                 match self.data_type {
