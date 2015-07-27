@@ -7,6 +7,7 @@
 extern crate log;
 extern crate rustc_serialize;
 extern crate iron;
+extern crate urlencoded;
 extern crate spaceapi;
 
 pub mod datastore;
@@ -15,9 +16,10 @@ pub mod sensors;
 use std::net::Ipv4Addr;
 
 use rustc_serialize::json::{Json, ToJson};
-use iron::{Request, Response, IronResult, Iron, Set};
+use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
+use urlencoded::UrlEncodedQuery;
 
 pub use spaceapi as api;
 use datastore::SafeDataStore;
@@ -50,6 +52,21 @@ impl SpaceapiServer {
             datastore: datastore,
             sensor_specs: vec![],
         }
+    }
+
+    /// Update values in the `DataStore`
+    fn update_values(&self, map: &urlencoded::QueryMap) -> IronResult<Response> {
+        // store data to datastore
+        let datastore_clone = self.datastore.clone();
+        let mut datastore_lock = datastore_clone.lock().unwrap();
+        println!("{:?}", map);
+
+        for item in map.iter() {
+            // TODO: check if key exists and handle errors
+            datastore_lock.store(item.0, &item.1[0]);
+        }
+        let response = Response::with((status::Ok, "updated values"));
+        Ok(response)
     }
 
     /// Start a HTTP server listening on ``self.host:self.port``.
@@ -111,7 +128,13 @@ impl SpaceapiServer {
 
 impl middleware::Handler for SpaceapiServer {
 
-    fn handle(&self, _: &mut Request) -> IronResult<Response> {
+    fn handle(&self, req: &mut Request) -> IronResult<Response> {
+
+        match req.get_ref::<UrlEncodedQuery>() {
+            Ok(ref hashmap) => return self.update_values(hashmap),
+            Err(ref e) => println!("{:?}", e)
+        };
+
         // Get response body
         let body = self.build_response_json().to_string();
 

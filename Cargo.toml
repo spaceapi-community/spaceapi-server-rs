@@ -11,6 +11,7 @@ redis = "0.3"
 rustc-serialize = "0.3"
 iron = "0.1"
 log = "0.3"
+urlencoded = "*"
 
 [dependencies.spaceapi]
 path = "../spaceapi"
