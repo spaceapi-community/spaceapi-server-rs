@@ -90,7 +90,7 @@ impl SpaceapiServer {
     pub fn serve(self) {
         let host = self.host;
         let port = self.port;
-        println!("Starting HTTP server on {}:{}...", host, port);
+        println!("Starting HTTP server on http://{}:{}...", host, port);
         Iron::new(self).http((host, port)).unwrap();
     }
 
