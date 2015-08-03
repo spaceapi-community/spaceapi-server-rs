@@ -65,7 +65,7 @@ pub struct SpaceapiServer {
     port: u16,
     status: spaceapi::Status,
     datastore: SafeDataStore,
-    sensors: Vec<SensorSpec>
+    sensor_specs: Vec<SensorSpec>
 }
 
 impl SpaceapiServer {
@@ -76,7 +76,7 @@ impl SpaceapiServer {
             port: port,
             status: status,
             datastore: datastore,
-            sensors: vec![],
+            sensor_specs: vec![],
         }
     }
 
@@ -96,7 +96,7 @@ impl SpaceapiServer {
     /// second argument specifies how to get the actual sensor value from the datastore. And the
     /// third argument specifies the data type of the value.
     pub fn register_sensor(&mut self, sensor: spaceapi::SensorTemplate, data_key: String, data_type: SensorValueType) {
-        self.sensors.push(
+        self.sensor_specs.push(
             SensorSpec { sensor: sensor, data_key: data_key, data_type: data_type }
         );
     }
@@ -111,10 +111,10 @@ impl SpaceapiServer {
         let mut people_now_present_sensors: Vec<spaceapi::PeopleNowPresentSensor> = Vec::new();
 
         // Process registered sensors
-        if !self.sensors.is_empty() {
+        if !self.sensor_specs.is_empty() {
 
             // Add sensor data
-            for sensor_spec in &self.sensors {
+            for sensor_spec in &self.sensor_specs {
 
                 let value = sensor_spec.get_sensor_value(&self.datastore);
 
