@@ -8,7 +8,7 @@ extern crate iron;
 extern crate spaceapi;
 
 pub mod datastore;
-pub mod redis_store;
+pub mod redisstore;
 
 use std::net::Ipv4Addr;
 use std::sync::{Mutex, Arc};
@@ -233,7 +233,7 @@ mod test {
     use spaceapi::utils::Optional;
     use super::SpaceapiServer;
     use super::datastore::DataStore;
-    use super::redis_store::RedisStore;
+    use super::redisstore::RedisStore;
 
     fn get_test_data() -> Json {
         // Create minimal status object

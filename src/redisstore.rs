@@ -43,12 +43,12 @@ impl RedisStore {
 
 #[cfg(test)]
 mod test {
-    use redis_store;
+    use redisstore;
     use datastore::DataStore;
 
     #[test]
     fn roundtrip() {
-        let rs = redis_store::RedisStore::new().unwrap();
+        let rs = redisstore::RedisStore::new().unwrap();
         rs.store("key", "value");
         let result = rs.retrieve("key").unwrap();
         assert_eq!(result, "value");
@@ -58,7 +58,7 @@ mod test {
     #[test]
     #[should_panic(expected = "response was nil")]
     fn nonexistant() {
-        let rs = redis_store::RedisStore::new().unwrap();
+        let rs = redisstore::RedisStore::new().unwrap();
         rs.retrieve("nonexistant").unwrap();
     }
 
