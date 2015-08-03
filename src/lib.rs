@@ -177,11 +177,7 @@ impl SpaceapiServer {
 
 }
 
-trait SensorDataFetcher {
-    fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<SensorValue>;
-}
-
-impl SensorDataFetcher for SensorSpec {
+impl SensorSpec {
 
     /// Retrieve sensor value from the datastore.
     fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<SensorValue> {
