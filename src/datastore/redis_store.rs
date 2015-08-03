@@ -2,7 +2,7 @@ extern crate redis;
 
 use self::redis::{Client, Commands};
 
-use datastore::{DataStore, DataStoreError};
+use super::{DataStore, DataStoreError};
 
 
 /// A data store for Redis.
@@ -43,12 +43,12 @@ impl RedisStore {
 
 #[cfg(test)]
 mod test {
-    use redisstore;
     use datastore::DataStore;
+    use super::RedisStore;
 
     #[test]
     fn roundtrip() {
-        let rs = redisstore::RedisStore::new().unwrap();
+        let rs = RedisStore::new().unwrap();
         rs.store("key", "value");
         let result = rs.retrieve("key").unwrap();
         assert_eq!(result, "value");
@@ -58,7 +58,7 @@ mod test {
     #[test]
     #[should_panic(expected = "response was nil")]
     fn nonexistant() {
-        let rs = redisstore::RedisStore::new().unwrap();
+        let rs = RedisStore::new().unwrap();
         rs.retrieve("nonexistant").unwrap();
     }
 

@@ -1,6 +1,0 @@
-+    // Idee: SpaceapiServer wird mit Grund-Status instanziert.
-+    // Es gibt Methoden zur Sensor-Registrierung. Man initialisiert einen Sensor mit den fixen
-+    // Daten. Zudem sagt man dem Server, in welchem DataStore Field dass er die Live-Daten holen
-+    // kann.
-+    //
-+    // Es gibt einen POST Enpdoint zum Updaten der Daten im DataStore (key=value).

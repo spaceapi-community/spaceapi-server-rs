@@ -8,50 +8,20 @@ extern crate iron;
 extern crate spaceapi;
 
 pub mod datastore;
-pub mod redisstore;
+pub mod sensors;
 
 use std::net::Ipv4Addr;
-use std::sync::{Mutex, Arc};
 
 use rustc_serialize::json::{Json, ToJson};
 use iron::{Request, Response, IronResult, Iron, Set};
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
 
-pub use datastore::DataStore;
+pub use spaceapi as api;
+use datastore::SafeDataStore;
 use spaceapi::utils::Optional;
 use spaceapi::SensorTemplate::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
 
-
-/// A specification of a sensor.
-///
-/// The ``template`` field contains the static data of a sensor and
-/// the ``data_key`` says how to find the sensor value in the datastore.
-#[derive(Debug)]
-pub struct SensorSpec {
-    template: spaceapi::SensorTemplate,
-    data_key: String,
-    data_type: SensorValueType,
-}
-
-/// All possible value types a sensor can have.
-#[derive(Debug)]
-pub enum SensorValueType {
-    Int,
-    Float,
-    Bool,
-}
-
-/// The actual sensor values.
-#[derive(Debug)]
-pub enum SensorValue {
-    Int(i64),
-    Float(f64),
-    Bool(bool),
-}
-
-/// A datastore wrapped in an Arc, a Mutex and a Box. Safe for use in multithreaded situations.
-pub type SafeDataStore = Arc<Mutex<Box<DataStore>>>;
 
 /// A Space API server instance.
 ///
@@ -63,14 +33,14 @@ pub type SafeDataStore = Arc<Mutex<Box<DataStore>>>;
 pub struct SpaceapiServer {
     host: Ipv4Addr,
     port: u16,
-    status: spaceapi::Status,
+    status: api::Status,
     datastore: SafeDataStore,
-    sensor_specs: Vec<SensorSpec>
+    sensor_specs: Vec<sensors::SensorSpec>
 }
 
 impl SpaceapiServer {
 
-    pub fn new(host: Ipv4Addr, port: u16, status: spaceapi::Status, datastore: SafeDataStore) -> SpaceapiServer {
+    pub fn new(host: Ipv4Addr, port: u16, status: api::Status, datastore: SafeDataStore) -> SpaceapiServer {
         SpaceapiServer {
             host: host,
             port: port,
@@ -92,12 +62,12 @@ impl SpaceapiServer {
 
     /// Register a new sensor.
     ///
-    /// The first argument is a ``spaceapi::SensorTemplate`` instance containing all static data.
+    /// The first argument is a ``api::SensorTemplate`` instance containing all static data.
     /// The second argument specifies how to get the actual sensor value from the datastore.
     /// And the third argument specifies the data type of the value.
-    pub fn register_sensor(&mut self, template: spaceapi::SensorTemplate, data_key: String, data_type: SensorValueType) {
+    pub fn register_sensor(&mut self, template: api::SensorTemplate, data_key: String, data_type: sensors::SensorValueType) {
         self.sensor_specs.push(
-            SensorSpec { template: template, data_key: data_key, data_type: data_type }
+            sensors::SensorSpec { template: template, data_key: data_key, data_type: data_type }
         );
     }
 
@@ -107,8 +77,8 @@ impl SpaceapiServer {
         let mut status_copy = self.status.clone();
 
         // Prepare sensor vector
-        let mut temperature_sensors: Vec<spaceapi::TemperatureSensor> = Vec::new();
-        let mut people_now_present_sensors: Vec<spaceapi::PeopleNowPresentSensor> = Vec::new();
+        let mut temperature_sensors: Vec<api::TemperatureSensor> = Vec::new();
+        let mut people_now_present_sensors: Vec<api::PeopleNowPresentSensor> = Vec::new();
 
         // Process registered sensors
         if !self.sensor_specs.is_empty() {
@@ -124,13 +94,13 @@ impl SpaceapiServer {
 
                         // Create temperature sensor instance
                         TemperatureSensorTemplate { ref unit, ref location, ref name, ref description } => {
-                            let sensor = spaceapi::TemperatureSensor {
+                            let sensor = api::TemperatureSensor {
                                 unit: (*unit).clone(),
                                 location: (*location).clone(),
                                 name: (*name).clone(),
                                 description: (*description).clone(),
                                 value: match value.unwrap() {
-                                    SensorValue::Float(v) => v,
+                                    sensors::SensorValue::Float(v) => v,
                                     _ => unreachable!(),
                                 },
                             };
@@ -139,13 +109,13 @@ impl SpaceapiServer {
 
                         // Create people now present sensor instance
                         PeopleNowPresentSensorTemplate { ref location, ref name, ref names, ref description } => {
-                            let sensor = spaceapi::PeopleNowPresentSensor {
+                            let sensor = api::PeopleNowPresentSensor {
                                 location: (*location).clone(),
                                 name: (*name).clone(),
                                 names: (*names).clone(),
                                 description: (*description).clone(),
                                 value: match value.unwrap() {
-                                    SensorValue::Int(v) => v,
+                                    sensors::SensorValue::Int(v) => v,
                                     _ => unreachable!(),
                                 },
                             };
@@ -160,7 +130,7 @@ impl SpaceapiServer {
         }
 
         // Add sensors to status object
-        status_copy.sensors = Optional::Value(spaceapi::Sensors {
+        status_copy.sensors = Optional::Value(api::Sensors {
             people_now_present: match people_now_present_sensors.is_empty() {
                 true => Optional::Absent,
                 false => Optional::Value(people_now_present_sensors),
@@ -173,32 +143,6 @@ impl SpaceapiServer {
 
         // Serialize to JSON
         status_copy.to_json()
-    }
-
-}
-
-impl SensorSpec {
-
-    /// Retrieve sensor value from the datastore.
-    fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<SensorValue> {
-        let datastore_clone = datastore.clone();
-        let datastore_lock = datastore_clone.lock().unwrap();
-        match datastore_lock.retrieve(&self.data_key) {
-            Ok(v) => {
-                match self.data_type {
-                    SensorValueType::Float => match v.parse::<f64>() {
-                        Ok(i) => Some(SensorValue::Float(i)),
-                        Err(_) => None,
-                    },
-                    SensorValueType::Int => match v.parse::<i64>() {
-                        Ok(i) => Some(SensorValue::Int(i)),
-                        Err(_) => None,
-                    },
-                    SensorValueType::Bool => None,  // TODO
-                }
-            },
-            Err(_) => None,
-        }
     }
 
 }
@@ -232,8 +176,7 @@ mod test {
     use rustc_serialize::json::Json;
     use spaceapi::utils::Optional;
     use super::SpaceapiServer;
-    use super::datastore::DataStore;
-    use super::redisstore::RedisStore;
+    use super::datastore::{DataStore, RedisStore};
 
     fn get_test_data() -> Json {
         // Create minimal status object
