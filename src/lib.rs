@@ -25,11 +25,11 @@ use spaceapi::SensorTemplate::{PeopleNowPresentSensorTemplate, TemperatureSensor
 
 /// A specification of a sensor.
 ///
-/// The ``sensor`` field contains the static data of a sensor and the
-/// ``data_key`` says how to find the sensor value in the datastore.
+/// The ``template`` field contains the static data of a sensor and
+/// the ``data_key`` says how to find the sensor value in the datastore.
 #[derive(Debug)]
 pub struct SensorSpec {
-    sensor: spaceapi::SensorTemplate,
+    template: spaceapi::SensorTemplate,
     data_key: String,
     data_type: SensorValueType,
 }
@@ -92,12 +92,12 @@ impl SpaceapiServer {
 
     /// Register a new sensor.
     ///
-    /// The first argument is a ``spaceapi::Sensor`` instance containing all static data. The
-    /// second argument specifies how to get the actual sensor value from the datastore. And the
-    /// third argument specifies the data type of the value.
-    pub fn register_sensor(&mut self, sensor: spaceapi::SensorTemplate, data_key: String, data_type: SensorValueType) {
+    /// The first argument is a ``spaceapi::SensorTemplate`` instance containing all static data.
+    /// The second argument specifies how to get the actual sensor value from the datastore.
+    /// And the third argument specifies the data type of the value.
+    pub fn register_sensor(&mut self, template: spaceapi::SensorTemplate, data_key: String, data_type: SensorValueType) {
         self.sensor_specs.push(
-            SensorSpec { sensor: sensor, data_key: data_key, data_type: data_type }
+            SensorSpec { template: template, data_key: data_key, data_type: data_type }
         );
     }
 
@@ -120,7 +120,7 @@ impl SpaceapiServer {
 
                 // If value is available, save sensor data
                 if value.is_some() {
-                    match sensor_spec.sensor {
+                    match sensor_spec.template {
 
                         // Create temperature sensor instance
                         TemperatureSensorTemplate { ref unit, ref location, ref name, ref description } => {
