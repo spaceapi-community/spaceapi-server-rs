@@ -77,26 +77,18 @@ impl SpaceapiServer {
         let mut status_copy = self.status.clone();
 
         // Process registered sensors
-        if !self.sensor_specs.is_empty() {
+        for sensor_spec in &self.sensor_specs {
 
-            // Add sensor data
-            for sensor_spec in &self.sensor_specs {
-
-                let value = sensor_spec.get_sensor_value(&self.datastore);
-
-                // If value is available, save sensor data
-                if value.is_some() {
-                    // if it is the first sensor create Sensors struct
-                    if status_copy.sensors.is_absent() {
-                        status_copy.sensors = Optional::Value(spaceapi::Sensors {
-                            people_now_present: Optional::Absent,
-                            temperature: Optional::Absent,
-                        });
-                    }
-                    sensor_spec.template.to_sensor(&value.unwrap(), &mut status_copy);
+            sensor_spec.get_sensor_value(&self.datastore).map(|value| {
+                if status_copy.sensors.is_absent() {
+                    status_copy.sensors = Optional::Value(spaceapi::Sensors {
+                        people_now_present: Optional::Absent,
+                        temperature: Optional::Absent,
+                    });
                 }
-            }
-
+                sensor_spec.template.to_sensor(&value,
+                                               &mut status_copy.sensors.as_mut().unwrap());
+            });
         }
 
         // Serialize to JSON
