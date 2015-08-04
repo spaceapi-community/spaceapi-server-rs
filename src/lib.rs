@@ -20,7 +20,7 @@ use iron::modifiers::Header;
 pub use spaceapi as api;
 use datastore::SafeDataStore;
 use spaceapi::utils::Optional;
-use spaceapi::SensorTemplate::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
+use spaceapi::{SensorTemplate};
 
 
 /// A Space API server instance.
@@ -65,9 +65,9 @@ impl SpaceapiServer {
     /// The first argument is a ``api::SensorTemplate`` instance containing all static data.
     /// The second argument specifies how to get the actual sensor value from the datastore.
     /// And the third argument specifies the data type of the value.
-    pub fn register_sensor(&mut self, template: api::SensorTemplate, data_key: String, data_type: sensors::SensorValueType) {
+    pub fn register_sensor(&mut self, template: Box<api::SensorTemplate>, data_key: String) {
         self.sensor_specs.push(
-            sensors::SensorSpec { template: template, data_key: data_key, data_type: data_type }
+            sensors::SensorSpec { template: template, data_key: data_key}
         );
     }
 
@@ -75,10 +75,6 @@ impl SpaceapiServer {
 
         // Create a mutable copy of the status struct
         let mut status_copy = self.status.clone();
-
-        // Prepare sensor vector
-        let mut temperature_sensors: Vec<api::TemperatureSensor> = Vec::new();
-        let mut people_now_present_sensors: Vec<api::PeopleNowPresentSensor> = Vec::new();
 
         // Process registered sensors
         if !self.sensor_specs.is_empty() {
@@ -90,56 +86,18 @@ impl SpaceapiServer {
 
                 // If value is available, save sensor data
                 if value.is_some() {
-                    match sensor_spec.template {
-
-                        // Create temperature sensor instance
-                        TemperatureSensorTemplate { ref unit, ref location, ref name, ref description } => {
-                            let sensor = api::TemperatureSensor {
-                                unit: (*unit).clone(),
-                                location: (*location).clone(),
-                                name: (*name).clone(),
-                                description: (*description).clone(),
-                                value: match value.unwrap() {
-                                    sensors::SensorValue::Float(v) => v,
-                                    _ => unreachable!(),
-                                },
-                            };
-                            temperature_sensors.push(sensor);
-                        },
-
-                        // Create people now present sensor instance
-                        PeopleNowPresentSensorTemplate { ref location, ref name, ref names, ref description } => {
-                            let sensor = api::PeopleNowPresentSensor {
-                                location: (*location).clone(),
-                                name: (*name).clone(),
-                                names: (*names).clone(),
-                                description: (*description).clone(),
-                                value: match value.unwrap() {
-                                    sensors::SensorValue::Int(v) => v,
-                                    _ => unreachable!(),
-                                },
-                            };
-                            people_now_present_sensors.push(sensor);
-                        },
-
+                    // if it is the first sensor create Sensors struct
+                    if status_copy.sensors.is_absent() {
+                        status_copy.sensors = Optional::Value(spaceapi::Sensors {
+                            people_now_present: Optional::Absent,
+                            temperature: Optional::Absent,
+                        });
                     }
+                    sensor_spec.template.to_sensor(&value.unwrap(), &mut status_copy);
                 }
-
             }
 
         }
-
-        // Add sensors to status object
-        status_copy.sensors = Optional::Value(api::Sensors {
-            people_now_present: match people_now_present_sensors.is_empty() {
-                true => Optional::Absent,
-                false => Optional::Value(people_now_present_sensors),
-            },
-            temperature: match temperature_sensors.is_empty() {
-                true => Optional::Absent,
-                false => Optional::Value(temperature_sensors),
-            },
-        });
 
         // Serialize to JSON
         status_copy.to_json()
@@ -225,7 +183,7 @@ mod test {
         let status = json.as_object().unwrap();  // We get back a BTreeMap<String, Json>
         let keys: Vec<String> = status.keys().cloned().collect();  // Collect the keys
         assert_eq!(keys, ["api", "contact", "issue_report_channels", "location",
-                          "logo", "sensors", "space", "state", "url"]);
+                          "logo", "space", "state", "url"]);
     }
 
     #[test]
