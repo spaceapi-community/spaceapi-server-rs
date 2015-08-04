@@ -20,7 +20,7 @@ use iron::modifiers::Header;
 pub use spaceapi as api;
 use datastore::SafeDataStore;
 use spaceapi::utils::Optional;
-use spaceapi::{SensorTemplate};
+use spaceapi::SensorTemplate;
 
 
 /// A Space API server instance.
