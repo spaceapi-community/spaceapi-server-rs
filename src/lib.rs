@@ -91,6 +91,16 @@ impl SpaceapiServer {
             });
         }
 
+        status_copy.state.open = status_copy.sensors.as_ref()
+            .and_then(|sensors| sensors.people_now_present.as_ref())
+            .and_then(|people_now_present| {
+                match people_now_present[0].value {
+                    0i64 => Optional::Value(false),
+                    _ => Optional::Value(true),
+                }
+            }).into();
+
+
         // Serialize to JSON
         status_copy.to_json()
     }
