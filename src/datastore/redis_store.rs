@@ -13,7 +13,7 @@ pub struct RedisStore {
 /// Implement the DataStore methods for Redis
 impl DataStore for RedisStore {
 
-    fn store(&self, key: &str, value: &str) -> Result<(), DataStoreError> {
+    fn store(&mut self, key: &str, value: &str) -> Result<(), DataStoreError> {
         let con = try!(self.client.get_connection());
 
         try!(con.set(key, value));
@@ -26,7 +26,7 @@ impl DataStore for RedisStore {
         Ok(try!(con.get(key)))
     }
 
-    fn delete(&self, key: &str) -> Result<(), DataStoreError> {
+    fn delete(&mut self, key: &str) -> Result<(), DataStoreError> {
         let con = try!(self.client.get_connection());
 
         Ok(try!(con.del(key)))
@@ -48,7 +48,7 @@ mod test {
 
     #[test]
     fn roundtrip() {
-        let rs = RedisStore::new().unwrap();
+        let mut rs = RedisStore::new().unwrap();
         rs.store("key", "value");
         let result = rs.retrieve("key").unwrap();
         assert_eq!(result, "value");
