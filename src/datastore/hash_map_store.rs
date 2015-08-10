@@ -19,6 +19,27 @@ impl DataStore for HashMapStore {
         self.remove(key);
         Ok(())
     }
-
 }
 
+#[cfg(test)]
+mod test {
+    use datastore::DataStore;
+    use super::*;
+
+    #[test]
+    fn roundtrip() {
+        let mut store = HashMapStore::new();
+        store.store("key", "value");
+        let result = store.retrieve("key").unwrap();
+        assert_eq!(result, "value");
+        store.delete("key");
+    }
+
+    #[test]
+    #[should_panic()]
+    fn nonexistant() {
+        let store = HashMapStore::new();
+        store.retrieve("nonexistant").unwrap();
+    }
+
+}
