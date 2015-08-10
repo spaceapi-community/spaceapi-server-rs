@@ -7,6 +7,7 @@
 
 pub mod common;  
 mod redis_store;
+mod hash_map_store;
 
 #[doc(inline)]
 pub use self::common::{DataStore, DataStoreError, SafeDataStore};

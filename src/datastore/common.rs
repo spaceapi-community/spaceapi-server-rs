@@ -20,6 +20,7 @@ pub type SafeDataStore = Arc<Mutex<Box<DataStore>>>;
 #[derive(Debug)]
 pub enum DataStoreError {
     RedisError(redis::RedisError),
+    HashMapError,
 }
 
 impl From<redis::RedisError> for DataStoreError {
