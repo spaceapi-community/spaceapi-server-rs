@@ -19,7 +19,7 @@ use iron::modifiers::Header;
 
 pub use spaceapi as api;
 use datastore::SafeDataStore;
-use spaceapi::utils::Optional;
+use spaceapi::optional::Optional;
 use spaceapi::SensorTemplate;
 
 
@@ -134,7 +134,7 @@ mod test {
     use std::net::Ipv4Addr;
     use std::sync::{Mutex,Arc};
     use rustc_serialize::json::Json;
-    use spaceapi::utils::Optional;
+    use spaceapi::optional::Optional;
     use super::SpaceapiServer;
     use super::datastore::{DataStore, RedisStore};
 
