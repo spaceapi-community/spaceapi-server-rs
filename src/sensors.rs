@@ -17,8 +17,7 @@ impl SensorSpec {
 
     /// Retrieve sensor value from the datastore.
     pub fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<String> {
-        let datastore_clone = datastore.clone();
-        let datastore_lock = datastore_clone.lock().unwrap();
+        let datastore_lock = datastore.lock().unwrap();
         match datastore_lock.retrieve(&self.data_key) {
             Ok(v) => Some(v),
             Err(_) => None,
