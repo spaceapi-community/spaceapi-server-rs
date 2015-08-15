@@ -20,6 +20,7 @@ impl SensorSpec {
         let datastore_lock = datastore.lock().unwrap();
         datastore_lock.retrieve(&self.data_key).map_err(|err| {
             warn!("Could not retrieve key '{}' from datastore, omiting the sensor", &self.data_key);
+            debug!("Error: {:?}", err);
             err
         }).ok()
     }
