@@ -29,10 +29,10 @@ mod test {
     #[test]
     fn roundtrip() {
         let mut store = HashMapStore::new();
-        store.store("key", "value");
+        store.store("key", "value").unwrap();
         let result = store.retrieve("key").unwrap();
         assert_eq!(result, "value");
-        store.delete("key");
+        store.delete("key").unwrap();
     }
 
     #[test]

@@ -49,10 +49,10 @@ mod test {
     #[test]
     fn roundtrip() {
         let mut rs = RedisStore::new().unwrap();
-        rs.store("key", "value");
+        rs.store("key", "value").unwrap();
         let result = rs.retrieve("key").unwrap();
         assert_eq!(result, "value");
-        rs.delete("key");
+        rs.delete("key").unwrap();
     }
 
     #[test]
