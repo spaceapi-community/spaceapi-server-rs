@@ -3,6 +3,8 @@
 //! Running this code starts a HTTP server instance. The default port is 3000, but you can set your
 //! own favorite port by exporting the `PORT` environment variable.
 
+#[macro_use]
+extern crate log;
 extern crate rustc_serialize;
 extern crate iron;
 extern crate spaceapi;
