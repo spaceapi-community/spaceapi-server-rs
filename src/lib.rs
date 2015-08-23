@@ -114,12 +114,11 @@ impl middleware::Handler for SpaceapiServer {
         let body = self.build_response_json().to_string();
 
         // Create response
-        let mut response = Response::with((status::Ok, body));
-
-        // Set headers
-        response.set_mut(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())));
-        response.set_mut(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])));
-        response.set_mut(Header(headers::AccessControlAllowOrigin::Any));
+        let response = Response::with((status::Ok, body))
+            // Set headers
+            .set(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())))
+            .set(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])))
+            .set(Header(headers::AccessControlAllowOrigin::Any));
 
         Ok(response)
     }
