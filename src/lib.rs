@@ -131,7 +131,7 @@ mod test {
     extern crate rustc_serialize;
 
     use std::net::Ipv4Addr;
-    use std::sync::{Mutex,Arc};
+    use std::sync::Mutex;
     use rustc_serialize::json::Json;
     use spaceapi::optional::Optional;
     use super::SpaceapiServer;
@@ -161,7 +161,7 @@ mod test {
         );
 
         // Create datastore (TODO: Create dummy store for testing?)
-        let datastore = Arc::new(Mutex::new(Box::new(RedisStore::new().unwrap()) as Box<DataStore>));
+        let datastore = Mutex::new(Box::new(RedisStore::new().unwrap()) as Box<DataStore>);
 
         // Initialize server
         let server = SpaceapiServer::new(Ipv4Addr::new(127, 0, 0, 1), 3001, status, datastore);
