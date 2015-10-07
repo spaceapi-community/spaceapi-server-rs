@@ -7,7 +7,7 @@ use super::{DataStore, DataStoreError};
 
 /// A data store for Redis.
 pub struct RedisStore {
-    client : Client,
+    client: Client,
 }
 
 /// Implement the DataStore methods for Redis

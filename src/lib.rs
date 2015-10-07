@@ -39,7 +39,7 @@ pub struct SpaceapiServer {
     port: u16,
     status: api::Status,
     datastore: SafeDataStore,
-    sensor_specs: Vec<sensors::SensorSpec>
+    sensor_specs: Vec<sensors::SensorSpec>,
 }
 
 impl SpaceapiServer {
@@ -84,9 +84,10 @@ impl SpaceapiServer {
     /// The second argument specifies how to get the actual sensor value from the datastore.
     /// And the third argument specifies the data type of the value.
     pub fn register_sensor(&mut self, template: Box<api::SensorTemplate>, data_key: String) {
-        self.sensor_specs.push(
-            sensors::SensorSpec { template: template, data_key: data_key}
-        );
+        self.sensor_specs.push(sensors::SensorSpec {
+            template: template,
+            data_key: data_key,
+        });
     }
 
     fn build_response_json(&self) -> Json {
@@ -104,19 +105,20 @@ impl SpaceapiServer {
                         temperature: Optional::Absent,
                     });
                 }
-                sensor_spec.template.to_sensor(&value,
-                                               &mut status_copy.sensors.as_mut().unwrap());
+                sensor_spec.template.to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
             });
         }
 
-        status_copy.state.open = status_copy.sensors.as_ref()
-            .and_then(|sensors| sensors.people_now_present.as_ref())
-            .and_then(|people_now_present| {
-                match people_now_present[0].value {
-                    0i64 => Optional::Value(false),
-                    _ => Optional::Value(true),
-                }
-            }).into();
+        status_copy.state.open = status_copy.sensors
+                                            .as_ref()
+                                            .and_then(|sensors| sensors.people_now_present.as_ref())
+                                            .and_then(|people_now_present| {
+                                                match people_now_present[0].value {
+                                                    0i64 => Optional::Value(false),
+                                                    _ => Optional::Value(true),
+                                                }
+                                            })
+                                            .into();
 
 
         // Serialize to JSON
@@ -131,19 +133,20 @@ impl middleware::Handler for SpaceapiServer {
 
         match req.get_ref::<UrlEncodedQuery>() {
             Ok(ref hashmap) => return self.update_values(hashmap),
-            Err(ref e) => println!("{:?}", e)
-        };
+            Err(ref e) => println!("{:?}", e),
+        }
 
         // Get response body
         let body = self.build_response_json().to_string();
 
         // Create response
+        let header_content_type = headers::ContentType("application/json; charset=utf-8".parse().unwrap());
+        let header_cache_control = headers::CacheControl(vec![headers::CacheDirective::NoCache]);
+        let header_allow_origin = headers::AccessControlAllowOrigin::Any;
         let response = Response::with((status::Ok, body))
-            // Set headers
-            .set(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())))
-            .set(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])))
-            .set(Header(headers::AccessControlAllowOrigin::Any));
-
+                           .set(Header(header_content_type))
+                           .set(Header(header_cache_control))
+                           .set(Header(header_allow_origin));
         Ok(response)
     }
 }
@@ -207,8 +210,8 @@ mod test {
         let json = get_test_data();
         let status = json.as_object().unwrap();  // We get back a BTreeMap<String, Json>
         let keys: Vec<String> = status.keys().cloned().collect();  // Collect the keys
-        assert_eq!(keys, ["api", "contact", "issue_report_channels", "location",
-                          "logo", "space", "state", "url"]);
+        assert_eq!(keys,
+                   ["api", "contact", "issue_report_channels", "location", "logo", "space", "state", "url"]);
     }
 
     #[test]
@@ -219,9 +222,12 @@ mod test {
 
         // Strings
         assert_eq!(status.get("api").unwrap().as_string().unwrap(), "0.13");
-        assert_eq!(status.get("space").unwrap().as_string().unwrap(), "ourspace");
-        assert_eq!(status.get("url").unwrap().as_string().unwrap(), "https://example.com/");
-        assert_eq!(status.get("logo").unwrap().as_string().unwrap(), "https://example.com/logo.png");
+        assert_eq!(status.get("space").unwrap().as_string().unwrap(),
+                   "ourspace");
+        assert_eq!(status.get("url").unwrap().as_string().unwrap(),
+                   "https://example.com/");
+        assert_eq!(status.get("logo").unwrap().as_string().unwrap(),
+                   "https://example.com/logo.png");
 
         // Channels
         let channels: &Vec<Json> = status.get("issue_report_channels").unwrap().as_array().unwrap();
