@@ -11,8 +11,15 @@ use iron::modifiers::Header;
 
 use super::SpaceapiServer;
 
+
 pub struct ReadHandler {
-    pub server: Arc<SpaceapiServer>,
+    server: Arc<SpaceapiServer>,
+}
+
+impl ReadHandler {
+    pub fn new(server: Arc<SpaceapiServer>) -> ReadHandler {
+        ReadHandler { server: server }
+    }
 }
 
 impl middleware::Handler for ReadHandler {
@@ -35,4 +42,5 @@ impl middleware::Handler for ReadHandler {
 
         Ok(response)
     }
+
 }

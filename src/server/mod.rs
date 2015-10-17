@@ -60,7 +60,9 @@ impl SpaceapiServer {
     }
 
     fn route(self) -> Router {
-        router!(get "/" => handlers::ReadHandler { server: Arc::new(self) })
+        router!(
+            get "/" => handlers::ReadHandler::new(Arc::new(self))
+        )
     }
 
     /// Start a HTTP server listening on ``self.host:self.port``.
