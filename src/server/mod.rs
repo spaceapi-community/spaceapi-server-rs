@@ -1,11 +1,11 @@
 //! The SpaceAPI server struct.
 
 use std::net::Ipv4Addr;
+use std::sync::Arc;
 
 use rustc_serialize::json::{Json, ToJson};
-use iron::prelude::*;
-use iron::{status, headers, middleware};
-use iron::modifiers::Header;
+use iron::Iron;
+use iron::status;  // TODO remove
 use router::Router;
 use ::urlencoded;
 
@@ -13,9 +13,10 @@ use ::api;
 use ::api::optional::Optional;
 use ::api::SensorTemplate;
 
-use ::server;
 use ::datastore;
 use ::sensors;
+
+mod handlers;
 
 
 /// A Space API server instance.
@@ -46,7 +47,7 @@ impl SpaceapiServer {
     }
 
     /// Update values in the `DataStore`
-    fn update_values(&self, map: &urlencoded::QueryMap) -> IronResult<Response> {
+    fn update_values(&self, map: &urlencoded::QueryMap) -> Result<(), String> {
         // store data to datastore
         let mut datastore_lock = self.datastore.lock().unwrap();
         info!("{:?}", map);
@@ -55,12 +56,11 @@ impl SpaceapiServer {
             // TODO: check if key exists and handle errors
             datastore_lock.store(item.0, &item.1[0]);
         }
-        let response = Response::with((status::Ok, "updated values"));
-        Ok(response)
+        Ok(())
     }
 
     fn route(self) -> Router {
-        router!(get "/" => self)
+        router!(get "/" => handlers::ReadHandler { server: Arc::new(self) })
     }
 
     /// Start a HTTP server listening on ``self.host:self.port``.
@@ -121,27 +121,6 @@ impl SpaceapiServer {
         status_copy.to_json()
     }
 
-}
-
-impl middleware::Handler for SpaceapiServer {
-
-    /// Return the current status JSON.
-    fn handle(&self, req: &mut Request) -> IronResult<Response> {
-
-        println!("{} /{} from {}", req.method, req.url.path[0], req.remote_addr);
-
-        // Get response body
-        let body = self.build_response_json().to_string();
-
-        // Create response
-        let response = Response::with((status::Ok, body))
-            // Set headers
-            .set(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())))
-            .set(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])))
-            .set(Header(headers::AccessControlAllowOrigin::Any));
-
-        Ok(response)
-    }
 }
 
 

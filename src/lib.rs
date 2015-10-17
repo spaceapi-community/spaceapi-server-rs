@@ -9,9 +9,9 @@ extern crate iron;
 extern crate urlencoded;
 extern crate spaceapi;
 
+pub use spaceapi as api;
+pub use server::SpaceapiServer;
+
 mod server;
 pub mod datastore;
 pub mod sensors;
-
-pub use spaceapi as api;
-pub use server::SpaceapiServer;
