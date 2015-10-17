@@ -58,7 +58,7 @@ impl SpaceapiServer {
     fn update_values(&self, map: &urlencoded::QueryMap) -> IronResult<Response> {
         // store data to datastore
         let mut datastore_lock = self.datastore.lock().unwrap();
-        println!("{:?}", map);
+        info!("{:?}", map);
 
         for item in map.iter() {
             // TODO: check if key exists and handle errors
@@ -131,9 +131,11 @@ impl middleware::Handler for SpaceapiServer {
 
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
 
+        println!("{} /{} from {}", req.method, req.url.path[0], req.remote_addr);
+
         match req.get_ref::<UrlEncodedQuery>() {
             Ok(ref hashmap) => return self.update_values(hashmap),
-            Err(ref e) => println!("{:?}", e),
+            Err(ref e) => error!("{:?}", e),
         }
 
         // Get response body
