@@ -57,8 +57,7 @@ impl SpaceapiServer {
     /// Update values in the `DataStore`
     fn update_values(&self, map: &urlencoded::QueryMap) -> IronResult<Response> {
         // store data to datastore
-        let datastore_clone = self.datastore.clone();
-        let mut datastore_lock = datastore_clone.lock().unwrap();
+        let mut datastore_lock = self.datastore.lock().unwrap();
         println!("{:?}", map);
 
         for item in map.iter() {
