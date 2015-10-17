@@ -3,10 +3,10 @@
 //! Running this code starts a HTTP server instance. The default port is 3000, but you can set your
 //! own favorite port by exporting the `PORT` environment variable.
 
-#[macro_use]
-extern crate log;
+#[macro_use] extern crate log;
 extern crate rustc_serialize;
 extern crate iron;
+#[macro_use] extern crate router;
 extern crate urlencoded;
 extern crate spaceapi;
 
@@ -19,7 +19,7 @@ use rustc_serialize::json::{Json, ToJson};
 use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
-use urlencoded::UrlEncodedQuery;
+use router::Router;
 
 pub use spaceapi as api;
 use datastore::SafeDataStore;
@@ -68,14 +68,21 @@ impl SpaceapiServer {
         Ok(response)
     }
 
+    fn route(self) -> Router {
+        router!(get "/" => self)
+    }
+
     /// Start a HTTP server listening on ``self.host:self.port``.
     ///
     /// This call is blocking. It can be interrupted with SIGINT (Ctrl+C).
     pub fn serve(self) {
         let host = self.host;
         let port = self.port;
+
+        let router = self.route();
+
         println!("Starting HTTP server on http://{}:{}...", host, port);
-        Iron::new(self).http((host, port)).unwrap();
+        Iron::new(router).http((host, port)).unwrap();
     }
 
     /// Register a new sensor.
@@ -129,14 +136,10 @@ impl SpaceapiServer {
 
 impl middleware::Handler for SpaceapiServer {
 
+    /// Return the current status JSON.
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
 
         println!("{} /{} from {}", req.method, req.url.path[0], req.remote_addr);
-
-        match req.get_ref::<UrlEncodedQuery>() {
-            Ok(ref hashmap) => return self.update_values(hashmap),
-            Err(ref e) => error!("{:?}", e),
-        }
 
         // Get response body
         let body = self.build_response_json().to_string();
