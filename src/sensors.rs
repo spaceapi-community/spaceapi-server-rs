@@ -1,7 +1,7 @@
 //! Sensor related stuff.
 
-use super::api;
-use super::datastore::SafeDataStore;
+use ::api;
+use ::datastore;
 
 /// A specification of a sensor.
 ///
@@ -16,7 +16,7 @@ pub struct SensorSpec {
 impl SensorSpec {
 
     /// Retrieve sensor value from the datastore.
-    pub fn get_sensor_value(&self, datastore: &SafeDataStore) -> Option<String> {
+    pub fn get_sensor_value(&self, datastore: &datastore::SafeDataStore) -> Option<String> {
         let datastore_lock = datastore.lock().unwrap();
         datastore_lock.retrieve(&self.data_key)
                       .map_err(|err| {
