@@ -59,7 +59,8 @@ impl SpaceapiServer {
 
     fn route(self) -> Router {
         router!(
-            get "/" => handlers::ReadHandler::new(self.status.clone(), self.datastore.clone(), self.sensor_specs.clone())
+            get "/" => handlers::ReadHandler::new(self.status.clone(), self.datastore.clone(), self.sensor_specs.clone()),
+            put "/sensors/:sensor/" => handlers::UpdateHandler::new(self.datastore.clone(), self.sensor_specs.clone())
         )
     }
 
