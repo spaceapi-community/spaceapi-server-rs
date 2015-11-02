@@ -5,7 +5,6 @@ use std::sync::{Arc, Mutex};
 
 use iron::Iron;
 use router::Router;
-use ::urlencoded;
 
 use ::api;
 use ::api::SensorTemplate;
@@ -41,20 +40,6 @@ impl SpaceapiServer {
             datastore: datastore,
             sensor_specs: Arc::new(Mutex::new(vec![])),
         }
-    }
-
-    /// Update values in the `DataStore`
-    fn update_values(&self, map: &urlencoded::QueryMap) -> Result<(), String> {
-        // store data to datastore
-        let datastore_ref = self.datastore.clone();
-        let mut datastore_lock = datastore_ref.lock().unwrap();
-        info!("{:?}", map);
-
-        for item in map.iter() {
-            // TODO: check if key exists and handle errors
-            datastore_lock.store(item.0, &item.1[0]);
-        }
-        Ok(())
     }
 
     fn route(self) -> Router {

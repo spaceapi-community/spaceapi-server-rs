@@ -115,6 +115,16 @@ impl UpdateHandler {
         }
     }
 
+    /// Update sensor value in the `DataStore`
+    fn update_sensor(&self, sensor: &str, value: &str) -> Result<(), String> {
+        // Store data to datastore
+        let datastore_ref = self.datastore.clone();
+        let mut datastore_lock = datastore_ref.lock().unwrap();
+        // TODO: check if key exists and handle errors
+        datastore_lock.store(sensor, value);
+        Ok(())
+    }
+
     fn ok_response(&self) -> Response {
         Response::with((status::NoContent))
             // Set headers
@@ -162,6 +172,9 @@ impl middleware::Handler for UpdateHandler {
                 None => return Ok(self.err_response("\"value\" parameter not specified")),
             }
         }
+
+        // Update values in datastore
+        self.update_sensor(&sensor_name, &sensor_value);
 
         // Create response
         Ok(self.ok_response())
