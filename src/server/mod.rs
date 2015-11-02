@@ -1,16 +1,13 @@
 //! The SpaceAPI server struct.
 
 use std::net::Ipv4Addr;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
-use rustc_serialize::json::{Json, ToJson};
 use iron::Iron;
-use iron::status;  // TODO remove
 use router::Router;
 use ::urlencoded;
 
 use ::api;
-use ::api::optional::Optional;
 use ::api::SensorTemplate;
 
 use ::datastore;
@@ -31,7 +28,7 @@ pub struct SpaceapiServer {
     port: u16,
     status: api::Status,
     datastore: datastore::SafeDataStore,
-    sensor_specs: Vec<sensors::SensorSpec>
+    sensor_specs: sensors::SafeSensorSpecs,
 }
 
 impl SpaceapiServer {
@@ -42,14 +39,15 @@ impl SpaceapiServer {
             port: port,
             status: status,
             datastore: datastore,
-            sensor_specs: vec![],
+            sensor_specs: Arc::new(Mutex::new(vec![])),
         }
     }
 
     /// Update values in the `DataStore`
     fn update_values(&self, map: &urlencoded::QueryMap) -> Result<(), String> {
         // store data to datastore
-        let mut datastore_lock = self.datastore.lock().unwrap();
+        let datastore_ref = self.datastore.clone();
+        let mut datastore_lock = datastore_ref.lock().unwrap();
         info!("{:?}", map);
 
         for item in map.iter() {
@@ -61,7 +59,7 @@ impl SpaceapiServer {
 
     fn route(self) -> Router {
         router!(
-            get "/" => handlers::ReadHandler::new(Arc::new(self))
+            get "/" => handlers::ReadHandler::new(self.status.clone(), self.datastore, self.sensor_specs)
         )
     }
 
@@ -84,43 +82,10 @@ impl SpaceapiServer {
     /// The second argument specifies how to get the actual sensor value from the datastore.
     /// And the third argument specifies the data type of the value.
     pub fn register_sensor(&mut self, template: Box<api::SensorTemplate>, data_key: String) {
-        self.sensor_specs.push(
+        let sensor_specs_ref = self.sensor_specs.clone();
+        sensor_specs_ref.lock().unwrap().push(
             sensors::SensorSpec { template: template, data_key: data_key}
         );
-    }
-
-    fn build_response_json(&self) -> Json {
-
-        // Create a mutable copy of the status struct
-        let mut status_copy = self.status.clone();
-
-        // Process registered sensors
-        for sensor_spec in &self.sensor_specs {
-
-            sensor_spec.get_sensor_value(&self.datastore).map(|value| {
-                if status_copy.sensors.is_absent() {
-                    status_copy.sensors = Optional::Value(api::Sensors {
-                        people_now_present: Optional::Absent,
-                        temperature: Optional::Absent,
-                    });
-                }
-                sensor_spec.template.to_sensor(&value,
-                                               &mut status_copy.sensors.as_mut().unwrap());
-            });
-        }
-
-        status_copy.state.open = status_copy.sensors.as_ref()
-            .and_then(|sensors| sensors.people_now_present.as_ref())
-            .and_then(|people_now_present| {
-                match people_now_present[0].value {
-                    0i64 => Optional::Value(false),
-                    _ => Optional::Value(true),
-                }
-            }).into();
-
-
-        // Serialize to JSON
-        status_copy.to_json()
     }
 
 }
