@@ -35,8 +35,7 @@ impl ReadHandler {
         let mut status_copy = self.status.clone();
 
         // Process registered sensors
-        let sensor_specs_ref = self.sensor_specs.clone();
-        for sensor_spec in sensor_specs_ref.lock().unwrap().iter() {
+        for sensor_spec in self.sensor_specs.lock().unwrap().iter() {
             sensor_spec.get_sensor_value(self.datastore.clone()).map(|value| {
                 if status_copy.sensors.is_absent() {
                     status_copy.sensors = Optional::Value(api::Sensors {
