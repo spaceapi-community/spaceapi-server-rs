@@ -107,6 +107,18 @@ pub struct UpdateHandler {
     sensor_specs: sensors::SafeSensorSpecs,
 }
 
+error_type! {
+    #[derive(Debug)]
+    pub enum UpdateHandlerError {
+        UnknownSensor(String) {
+            desc (sensor) &sensor;
+        },
+        DataStoreError(datastore::DataStoreError) {
+            cause;
+        }
+    }
+}
+
 impl UpdateHandler {
     pub fn new(datastore: datastore::SafeDataStore, sensor_specs: sensors::SafeSensorSpecs) -> UpdateHandler {
         UpdateHandler {

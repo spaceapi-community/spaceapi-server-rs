@@ -17,14 +17,14 @@ pub trait DataStore : Send {
 pub type SafeDataStore = Arc<Mutex<Box<DataStore>>>;
 
 /// An enum representing a datastore error.
-#[derive(Debug)]
-pub enum DataStoreError {
-    RedisError(redis::RedisError),
-    HashMapError,
-}
-
-impl From<redis::RedisError> for DataStoreError {
-    fn from(err: redis::RedisError) -> DataStoreError {
-        DataStoreError::RedisError(err)
+error_type! {
+    #[derive(Debug)]
+    pub enum DataStoreError {
+        RedisError(redis::RedisError) {
+            cause;
+        },
+        HashMapError(String) {
+            desc (msg) &msg;
+        },
     }
 }

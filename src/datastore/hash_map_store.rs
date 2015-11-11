@@ -12,7 +12,7 @@ impl DataStore for HashMapStore {
     }
 
     fn retrieve(&self, key: &str) -> Result<String, DataStoreError> {
-        self.get(key).map(|v| v.clone()).ok_or(DataStoreError::HashMapError)
+        self.get(key).map(|v| v.clone()).ok_or(DataStoreError::HashMapError(format!("Key {} not found", key)))
     }
 
     fn delete(&mut self, key: &str) -> Result<(), DataStoreError> {
