@@ -128,15 +128,23 @@ impl UpdateHandler {
     }
 
     /// Update sensor value in the `DataStore`
-    fn update_sensor(&self, sensor: &str, value: &str) -> Result<(), String> {
+    fn update_sensor(&self, sensor: &str, value: &str) -> Result<(), UpdateHandlerError> {
+        // Validate sensor
+        try!(self.sensor_specs.lock().unwrap().iter()
+                              .find(|&spec| spec.data_key == sensor)
+                              .ok_or(UpdateHandlerError::UnknownSensor(sensor.to_string())));
+
         // Store data to datastore
         let datastore_ref = self.datastore.clone();
         let mut datastore_lock = datastore_ref.lock().unwrap();
-        // TODO: check if key exists and handle errors
-        datastore_lock.store(sensor, value);
-        Ok(())
+        datastore_lock.store(sensor, value)
+                      .map(|_| ()).map_err(|e| {
+                          error!("Could not update sensor value in datastore: {:?}", e);
+                          UpdateHandlerError::DataStoreError(e)
+                      })
     }
 
+    /// Build an OK response with the `HTTP 204 No Content` status code.
     fn ok_response(&self) -> Response {
         Response::with((status::NoContent))
             // Set headers
@@ -145,9 +153,10 @@ impl UpdateHandler {
             .set(Header(headers::AccessControlAllowOrigin::Any))
     }
 
-    fn err_response(&self, reason: &str) -> Response {
+    /// Build an error response with the specified `error_code` and the specified `reason` text.
+    fn err_response(&self, error_code: status::Status, reason: &str) -> Response {
         let error = ErrorResponse { reason: reason.to_string() };
-        Response::with((status::BadRequest, error.to_json().to_string()))
+        Response::with((error_code, error.to_json().to_string()))
             // Set headers
             .set(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())))
             .set(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])))
@@ -179,14 +188,23 @@ impl middleware::Handler for UpdateHandler {
             sensor_value = match params.get("value") {
                 Some(ref values) =>  match values.len() {
                     1 => values[0].to_string(),
-                    _ => return Ok(self.err_response("Too many values specified")),
+                    _ => return Ok(self.err_response(status::BadRequest, "Too many values specified")),
                 },
-                None => return Ok(self.err_response("\"value\" parameter not specified")),
+                None => return Ok(self.err_response(status::BadRequest, "\"value\" parameter not specified")),
             }
         }
 
         // Update values in datastore
-        self.update_sensor(&sensor_name, &sensor_value);
+        if let Err(e) = self.update_sensor(&sensor_name, &sensor_value) {
+            error!("update_sensor() failed: {:?}", e);
+            let response = match e {
+                UpdateHandlerError::UnknownSensor(sensor) =>
+                    self.err_response(status::BadRequest, &format!("Unknown sensor: {}", sensor)),
+                UpdateHandlerError::DataStoreError(_) =>
+                    self.err_response(status::InternalServerError, "Updating values in datastore failed"),
+            };
+            return Ok(response)
+        };
 
         // Create response
         Ok(self.ok_response())
