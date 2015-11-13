@@ -65,14 +65,19 @@ impl ReadHandler {
             });
         }
 
-        status_copy.state.open = status_copy.sensors.as_ref()
+        // Update state depending on number of people present
+        let people_now_present: Option<i64> = status_copy.sensors.as_ref()
             .and_then(|sensors| sensors.people_now_present.as_ref())
-            .and_then(|people_now_present| {
-                match people_now_present[0].value {
-                    0i64 => Optional::Value(false),
-                    _ => Optional::Value(true),
-                }
-            }).into();
+            .map(|people_now_present| people_now_present[0].value)
+            .into();
+        if let Some(count) = people_now_present {
+            status_copy.state.open = Some(count > 0);
+            if count == 1 {
+                status_copy.state.message = Optional::Value(format!("{} person here right now", count));
+            } else if count > 1 {
+                status_copy.state.message = Optional::Value(format!("{} people here right now", count));
+            }
+        }
 
         // Serialize to JSON
         status_copy.to_json()
