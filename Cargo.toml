@@ -14,6 +14,4 @@ log = "^0.3"
 urlencoded = "^0.2"
 router = "^0.0.15"
 error-type = "^0.1"
-
-[dependencies.spaceapi]
-path = "../spaceapi"
+spaceapi = "^0.1"
