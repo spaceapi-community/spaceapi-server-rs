@@ -1,6 +1,8 @@
 extern crate redis;
 
-use self::redis::{Client, Commands};
+use std::env;
+
+use self::redis::{Client, Commands, ConnectionInfo, ConnectionAddr};
 
 use super::{DataStore, DataStoreError};
 
@@ -36,7 +38,22 @@ impl DataStore for RedisStore {
 
 impl RedisStore {
     pub fn new() -> Result<RedisStore, DataStoreError> {
-        let redis_client = try!(Client::open("redis://127.0.0.1/"));
+        // Read env variables
+        let redis_host: String = env::var("REDIS_HOST").unwrap_or("127.0.0.1".to_string());
+        let redis_port: u16 = env::var("REDIS_PORT").unwrap_or("6379".to_string()).parse().unwrap_or(6379);
+        let redis_db: i64 = env::var("REDIS_DB").unwrap_or("0".to_string()).parse().unwrap_or(0);
+
+        // Build connection info
+        info!("Connecting to redis://{}:{}/{}...", &redis_host, &redis_port, &redis_db);
+        let connection_info = ConnectionInfo {
+            addr: Box::new(ConnectionAddr::Tcp(redis_host, redis_port)),
+            db: redis_db,
+            passwd: None,
+        };
+
+        // Create redis client
+        let redis_client = try!(Client::open(connection_info));
+
         Ok(RedisStore { client: redis_client })
     }
 }
