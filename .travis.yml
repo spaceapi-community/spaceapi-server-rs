@@ -4,8 +4,16 @@ rust:
   - stable
   - beta
   - nightly
+matrix:
+  allow_failures:
+    - rust: nightly
 services:
   - redis-server
+script:
+  - cargo test
+  - cargo doc --no-deps
+after_success:
+  - bash scripts/travis-doc-upload.sh
 notifications:
   irc:
     channels:
