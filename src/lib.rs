@@ -12,6 +12,7 @@ extern crate spaceapi;
 
 pub use spaceapi as api;
 pub use server::SpaceapiServer;
+pub use server::handlers::{StatusHandler, StateFromPeopleNowPresent};
 
 mod server;
 pub mod datastore;

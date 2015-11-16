@@ -39,6 +39,25 @@ pub trait StatusHandler: Send + Sync + Any {
     fn handle(&self, status: &mut api::Status);
 }
 
+pub struct StateFromPeopleNowPresent;
+
+impl StatusHandler for StateFromPeopleNowPresent {
+    fn handle(&self, status: &mut api::Status) {
+        // Update state depending on number of people present
+        let people_now_present: Option<u64> = status.sensors.as_ref()
+            .and_then(|sensors| sensors.people_now_present.as_ref())
+            .map(|people_now_present| people_now_present[0].value)
+            .into();
+        if let Some(count) = people_now_present {
+            status.state.open = Some(count > 0);
+            if count == 1 {
+                status.state.message = Optional::Value(format!("{} person here right now", count));
+            } else if count > 1 {
+                status.state.message = Optional::Value(format!("{} people here right now", count));
+            }
+        }
+    }
+}
 
 pub struct ReadHandler {
     status: api::Status,
@@ -75,18 +94,8 @@ impl ReadHandler {
             });
         }
 
-        // Update state depending on number of people present
-        let people_now_present: Option<u64> = status_copy.sensors.as_ref()
-            .and_then(|sensors| sensors.people_now_present.as_ref())
-            .map(|people_now_present| people_now_present[0].value)
-            .into();
-        if let Some(count) = people_now_present {
-            status_copy.state.open = Some(count > 0);
-            if count == 1 {
-                status_copy.state.message = Optional::Value(format!("{} person here right now", count));
-            } else if count > 1 {
-                status_copy.state.message = Optional::Value(format!("{} people here right now", count));
-            }
+        for status_handler in self.status_handlers.iter() {
+            status_handler.handle(&mut status_copy);
         }
 
         // Serialize to JSON

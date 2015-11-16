@@ -12,7 +12,7 @@ use ::api::SensorTemplate;
 use ::datastore;
 use ::sensors;
 
-mod handlers;
+pub mod handlers;
 
 
 /// A Space API server instance.
