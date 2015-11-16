@@ -1,9 +1,22 @@
 [package]
-name = "spaceapi_server"
+name = "spaceapi-server"
 version = "0.1.0"
+documentation = "https://coredump-ch.github.io/rust-docs/spaceapi-server/spaceapi-server/index.html"
+repository = "https://github.com/coredump-ch/spaceapi-server-rs"
+license = "MIT"
 authors = [
     "Raphael Nestler <raphael.nestler@gmail.com>",
     "Danilo Bargen <mail@dbrgn.ch>",
+]
+description = "A library that allows you to easily implement a Space API server."
+readme = "README.md"
+keywords = ["spaceapi", "hackerspaces", "status", "api", "server"]
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE.txt",
+    "AUTHORS.md",
 ]
 
 [dependencies]
