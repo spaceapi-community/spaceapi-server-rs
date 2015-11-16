@@ -1,0 +1,4 @@
+*.swp
+*.lock
+target/
+*.bk

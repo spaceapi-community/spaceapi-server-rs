@@ -1,0 +1,16 @@
+language: rust
+sudo: false
+rust:
+  - stable
+  - beta
+  - nightly
+services:
+  - redis-server
+notifications:
+  irc:
+    channels:
+      - "chat.freenode.net#coredump"
+    on_success: change
+    on_failure: always
+    use_notice: true
+    skip_join: true
