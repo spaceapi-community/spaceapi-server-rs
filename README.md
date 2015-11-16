@@ -1,6 +1,8 @@
 # Rust Space API Implementation
 
-[![Build Status](https://travis-ci.org/coredump-ch/spaceapi-server-rs.svg?branch=master)](https://travis-ci.org/coredump-ch/spaceapi-server-rs)
+[![Build Status](https://img.shields.io/travis/coredump-ch/spaceapi-server-rs/master.svg)](https://travis-ci.org/coredump-ch/spaceapi-server-rs)
+[![Crates.io Version](https://img.shields.io/crates/v/spaceapi-server.svg)](https://crates.io/crates/spaceapi-server)
+[![Crates.io Downloads](https://img.shields.io/crates/d/spaceapi-server.svg)](https://crates.io/crates/spaceapi-server)
 
 This is a library that allows an easy implementation of a
 [SpaceAPI](http://spaceapi.net/) v0.13 server in Rust.
