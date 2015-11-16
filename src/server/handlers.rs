@@ -1,6 +1,7 @@
 //! Handlers for the server.
 
 use std::collections::BTreeMap;
+use std::any::Any;
 
 use rustc_serialize::json::{Json, ToJson};
 use iron::prelude::*;
@@ -32,10 +33,18 @@ impl ToJson for ErrorResponse {
 }
 
 
+/// `StatusHandler`s are used to modify the status
+pub trait StatusHandler: Send + Sync + Any {
+    /// Called after all registered sensors are read
+    fn handle(&self, status: &mut api::Status);
+}
+
+
 pub struct ReadHandler {
     status: api::Status,
     datastore: datastore::SafeDataStore,
     sensor_specs: sensors::SafeSensorSpecs,
+    status_handlers: Vec<Box<StatusHandler>>,
 }
 
 impl ReadHandler {
@@ -44,6 +53,7 @@ impl ReadHandler {
             status: status,
             datastore: datastore,
             sensor_specs: sensor_specs,
+            status_handlers: vec![],
         }
     }
 
