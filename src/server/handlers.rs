@@ -33,16 +33,16 @@ impl ToJson for ErrorResponse {
 }
 
 
-/// `StatusHandler`s are used to modify the status
-pub trait StatusHandler: Send + Sync + Any {
+/// `StatusModifier`s are used to modify the status
+pub trait StatusModifier: Send + Sync + Any {
     /// Called after all registered sensors are read
-    fn handle(&self, status: &mut api::Status);
+    fn modify(&self, status: &mut api::Status);
 }
 
 pub struct StateFromPeopleNowPresent;
 
-impl StatusHandler for StateFromPeopleNowPresent {
-    fn handle(&self, status: &mut api::Status) {
+impl StatusModifier for StateFromPeopleNowPresent {
+    fn modify(&self, status: &mut api::Status) {
         // Update state depending on number of people present
         let people_now_present: Option<u64> = status.sensors.as_ref()
             .and_then(|sensors| sensors.people_now_present.as_ref())
@@ -63,7 +63,7 @@ pub struct ReadHandler {
     status: api::Status,
     datastore: datastore::SafeDataStore,
     sensor_specs: sensors::SafeSensorSpecs,
-    status_handlers: Vec<Box<StatusHandler>>,
+    status_modifiers: Vec<Box<StatusModifier>>,
 }
 
 impl ReadHandler {
@@ -72,7 +72,7 @@ impl ReadHandler {
             status: status,
             datastore: datastore,
             sensor_specs: sensor_specs,
-            status_handlers: vec![],
+            status_modifiers: vec![],
         }
     }
 
@@ -94,8 +94,8 @@ impl ReadHandler {
             });
         }
 
-        for status_handler in self.status_handlers.iter() {
-            status_handler.handle(&mut status_copy);
+        for status_modifier in self.status_modifiers.iter() {
+            status_modifier.modify(&mut status_copy);
         }
 
         // Serialize to JSON
