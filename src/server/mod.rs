@@ -12,7 +12,6 @@ use ::api::SensorTemplate;
 use ::datastore;
 use ::sensors;
 
-pub mod modifiers;
 mod handlers;
 
 

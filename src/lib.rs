@@ -12,8 +12,8 @@ extern crate spaceapi;
 
 pub use spaceapi as api;
 pub use server::SpaceapiServer;
-pub use server::modifiers;
 
 mod server;
 pub mod datastore;
 pub mod sensors;
+pub mod modifiers;
