@@ -11,6 +11,7 @@ use ::api::SensorTemplate;
 
 use ::datastore;
 use ::sensors;
+use ::modifiers;
 
 mod handlers;
 
@@ -28,23 +29,30 @@ pub struct SpaceapiServer {
     status: api::Status,
     datastore: datastore::SafeDataStore,
     sensor_specs: sensors::SafeSensorSpecs,
+    status_modifiers: Vec<Box<modifiers::StatusModifier>>,
 }
 
 impl SpaceapiServer {
 
-    pub fn new(host: Ipv4Addr, port: u16, status: api::Status, datastore: datastore::SafeDataStore) -> SpaceapiServer {
+    pub fn new(host: Ipv4Addr,
+               port: u16,
+               status: api::Status,
+               datastore: datastore::SafeDataStore,
+               status_modifiers: Vec<Box<modifiers::StatusModifier>>)
+               -> SpaceapiServer {
         SpaceapiServer {
             host: host,
             port: port,
             status: status,
             datastore: datastore,
             sensor_specs: Arc::new(Mutex::new(vec![])),
+            status_modifiers: status_modifiers,
         }
     }
 
     fn route(self) -> Router {
         router!(
-            get "/" => handlers::ReadHandler::new(self.status.clone(), self.datastore.clone(), self.sensor_specs.clone()),
+            get "/" => handlers::ReadHandler::new(self.status.clone(), self.datastore.clone(), self.sensor_specs.clone(), self.status_modifiers),
             put "/sensors/:sensor/" => handlers::UpdateHandler::new(self.datastore.clone(), self.sensor_specs.clone())
         )
     }

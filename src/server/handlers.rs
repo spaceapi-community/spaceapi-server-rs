@@ -40,12 +40,16 @@ pub struct ReadHandler {
 }
 
 impl ReadHandler {
-    pub fn new(status: api::Status, datastore: datastore::SafeDataStore, sensor_specs: sensors::SafeSensorSpecs) -> ReadHandler {
+    pub fn new(status: api::Status,
+               datastore: datastore::SafeDataStore,
+               sensor_specs: sensors::SafeSensorSpecs,
+               status_modifiers: Vec<Box<modifiers::StatusModifier>>)
+               -> ReadHandler {
         ReadHandler {
             status: status,
             datastore: datastore,
             sensor_specs: sensor_specs,
-            status_modifiers: vec![],
+            status_modifiers: status_modifiers,
         }
     }
 
