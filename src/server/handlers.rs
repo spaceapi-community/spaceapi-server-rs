@@ -14,6 +14,7 @@ use ::api;
 use ::api::optional::Optional;
 use ::datastore;
 use ::sensors;
+use ::modifiers;
 
 
 #[derive(Debug)]
@@ -31,19 +32,24 @@ impl ToJson for ErrorResponse {
     }
 }
 
-
 pub struct ReadHandler {
     status: api::Status,
     datastore: datastore::SafeDataStore,
     sensor_specs: sensors::SafeSensorSpecs,
+    status_modifiers: Vec<Box<modifiers::StatusModifier>>,
 }
 
 impl ReadHandler {
-    pub fn new(status: api::Status, datastore: datastore::SafeDataStore, sensor_specs: sensors::SafeSensorSpecs) -> ReadHandler {
+    pub fn new(status: api::Status,
+               datastore: datastore::SafeDataStore,
+               sensor_specs: sensors::SafeSensorSpecs,
+               status_modifiers: Vec<Box<modifiers::StatusModifier>>)
+               -> ReadHandler {
         ReadHandler {
             status: status,
             datastore: datastore,
             sensor_specs: sensor_specs,
+            status_modifiers: status_modifiers,
         }
     }
 
@@ -65,18 +71,8 @@ impl ReadHandler {
             });
         }
 
-        // Update state depending on number of people present
-        let people_now_present: Option<u64> = status_copy.sensors.as_ref()
-            .and_then(|sensors| sensors.people_now_present.as_ref())
-            .map(|people_now_present| people_now_present[0].value)
-            .into();
-        if let Some(count) = people_now_present {
-            status_copy.state.open = Some(count > 0);
-            if count == 1 {
-                status_copy.state.message = Optional::Value(format!("{} person here right now", count));
-            } else if count > 1 {
-                status_copy.state.message = Optional::Value(format!("{} people here right now", count));
-            }
+        for status_modifier in self.status_modifiers.iter() {
+            status_modifier.modify(&mut status_copy);
         }
 
         // Serialize to JSON

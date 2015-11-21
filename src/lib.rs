@@ -16,3 +16,4 @@ pub use server::SpaceapiServer;
 mod server;
 pub mod datastore;
 pub mod sensors;
+pub mod modifiers;
