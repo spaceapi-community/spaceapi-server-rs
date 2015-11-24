@@ -53,10 +53,10 @@ impl SpaceapiServer {
     }
 
     fn route(self) -> Router {
-        router!(
-            get "/" => handlers::ReadHandler::new(self.status.clone(), self.redis_connection_info.clone(), self.sensor_specs.clone(), self.status_modifiers),
-            put "/sensors/:sensor/" => handlers::UpdateHandler::new(self.redis_connection_info.clone(), self.sensor_specs.clone())
-        )
+        let mut router = Router::new();
+        router.get("/", handlers::ReadHandler::new(self.status.clone(), self.redis_connection_info.clone(), self.sensor_specs.clone(), self.status_modifiers));
+        router.put("/sensors/:sensor/", handlers::UpdateHandler::new(self.redis_connection_info.clone(), self.sensor_specs.clone()));
+        router
     }
 
     /// Start a HTTP server listening on ``self.host:self.port``.
