@@ -7,12 +7,12 @@ use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
 use router::Router;
+use redis::ConnectionInfo;
 
 use urlencoded;
 
 use ::api;
 use ::api::optional::Optional;
-use ::datastore;
 use ::sensors;
 use ::modifiers;
 
@@ -34,20 +34,20 @@ impl ToJson for ErrorResponse {
 
 pub struct ReadHandler {
     status: api::Status,
-    datastore: datastore::SafeDataStore,
+    redis_connection_info: ConnectionInfo,
     sensor_specs: sensors::SafeSensorSpecs,
     status_modifiers: Vec<Box<modifiers::StatusModifier>>,
 }
 
 impl ReadHandler {
     pub fn new(status: api::Status,
-               datastore: datastore::SafeDataStore,
+               redis_connection_info: ConnectionInfo,
                sensor_specs: sensors::SafeSensorSpecs,
                status_modifiers: Vec<Box<modifiers::StatusModifier>>)
                -> ReadHandler {
         ReadHandler {
             status: status,
-            datastore: datastore,
+            redis_connection_info: redis_connection_info,
             sensor_specs: sensor_specs,
             status_modifiers: status_modifiers,
         }
@@ -60,15 +60,31 @@ impl ReadHandler {
 
         // Process registered sensors
         for sensor_spec in self.sensor_specs.lock().unwrap().iter() {
-            sensor_spec.get_sensor_value(self.datastore.clone()).map(|value| {
-                if status_copy.sensors.is_absent() {
-                    status_copy.sensors = Optional::Value(api::Sensors {
-                        people_now_present: Optional::Absent,
-                        temperature: Optional::Absent,
-                    });
-                }
-                sensor_spec.template.to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
-            });
+
+            match sensor_spec.get_sensor_value(&self.redis_connection_info) {
+
+                // Value could be read successfullly
+                Ok(value) => {
+                    if status_copy.sensors.is_absent() {
+                        status_copy.sensors = Optional::Value(api::Sensors {
+                            people_now_present: Optional::Absent,
+                            temperature: Optional::Absent,
+                        });
+                    }
+                    sensor_spec.template.to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
+                },
+
+                // Value could not be read, do error logging
+                Err(err) => {
+                    match err {
+                        sensors::SensorError::Redis(e) => {
+                            warn!("Could not retrieve key '{}' from Redis, omiting the sensor", &sensor_spec.data_key);
+                            debug!("Error: {:?}", e);
+                        },
+                        _ =>  error!("Could not retrieve sensor '{}', unknown error.", &sensor_spec.data_key)
+                    }
+                },
+            }
         }
 
         for status_modifier in self.status_modifiers.iter() {
@@ -104,45 +120,30 @@ impl middleware::Handler for ReadHandler {
 
 
 pub struct UpdateHandler {
-    datastore: datastore::SafeDataStore,
+    redis_connection_info: ConnectionInfo,
     sensor_specs: sensors::SafeSensorSpecs,
 }
 
-error_type! {
-    #[derive(Debug)]
-    pub enum UpdateHandlerError {
-        UnknownSensor(String) {
-            desc (sensor) &sensor;
-        },
-        DataStoreError(datastore::DataStoreError) {
-            cause;
-        }
-    }
-}
 
 impl UpdateHandler {
-    pub fn new(datastore: datastore::SafeDataStore, sensor_specs: sensors::SafeSensorSpecs) -> UpdateHandler {
+    pub fn new(redis_connection_info: ConnectionInfo, sensor_specs: sensors::SafeSensorSpecs)
+               -> UpdateHandler {
         UpdateHandler {
-            datastore: datastore,
+            redis_connection_info: redis_connection_info,
             sensor_specs: sensor_specs,
         }
     }
 
-    /// Update sensor value in the `DataStore`
-    fn update_sensor(&self, sensor: &str, value: &str) -> Result<(), UpdateHandlerError> {
+    /// Update sensor value in Redis
+    fn update_sensor(&self, sensor: &str, value: &str) -> Result<(), sensors::SensorError> {
         // Validate sensor
-        try!(self.sensor_specs.lock().unwrap().iter()
-                              .find(|&spec| spec.data_key == sensor)
-                              .ok_or(UpdateHandlerError::UnknownSensor(sensor.to_string())));
+        let sensor_specs = self.sensor_specs.lock().unwrap();
+        let sensor_spec = try!(sensor_specs.iter()
+                               .find(|&spec| spec.data_key == sensor)
+                               .ok_or(sensors::SensorError::UnknownSensor(sensor.to_string())));
 
-        // Store data to datastore
-        let datastore_ref = self.datastore.clone();
-        let mut datastore_lock = datastore_ref.lock().unwrap();
-        datastore_lock.store(sensor, value)
-                      .map(|_| ()).map_err(|e| {
-                          error!("Could not update sensor value in datastore: {:?}", e);
-                          UpdateHandlerError::DataStoreError(e)
-                      })
+        // Store data
+        sensor_spec.set_sensor_value(&self.redis_connection_info, value)
     }
 
     /// Build an OK response with the `HTTP 204 No Content` status code.
@@ -195,13 +196,13 @@ impl middleware::Handler for UpdateHandler {
             }
         }
 
-        // Update values in datastore
+        // Update values in Redis
         if let Err(e) = self.update_sensor(&sensor_name, &sensor_value) {
-            error!("update_sensor() failed: {:?}", e);
+            error!("Updating sensor value for sensor \"{}\" failed: {:?}", &sensor_name, e);
             let response = match e {
-                UpdateHandlerError::UnknownSensor(sensor) =>
+                sensors::SensorError::UnknownSensor(sensor) =>
                     self.err_response(status::BadRequest, &format!("Unknown sensor: {}", sensor)),
-                UpdateHandlerError::DataStoreError(_) =>
+                sensors::SensorError::Redis(_) =>
                     self.err_response(status::InternalServerError, "Updating values in datastore failed"),
             };
             return Ok(response)

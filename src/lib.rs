@@ -8,12 +8,15 @@ extern crate rustc_serialize;
 extern crate iron;
 #[macro_use] extern crate router;
 extern crate urlencoded;
+extern crate redis;
 extern crate spaceapi;
 
 pub use spaceapi as api;
-pub use server::SpaceapiServer;
 
 mod server;
-pub mod datastore;
+mod errors;
 pub mod sensors;
 pub mod modifiers;
+
+pub use server::SpaceapiServer;
+pub use errors::SpaceapiServerError;
