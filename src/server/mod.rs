@@ -61,15 +61,17 @@ impl SpaceapiServer {
 
     /// Start a HTTP server listening on ``self.host:self.port``.
     ///
-    /// This call is blocking. It can be interrupted with SIGINT (Ctrl+C).
-    pub fn serve(self) {
+    /// The call returns an `HttpResult<Listening>` object, see
+    /// http://ironframework.io/doc/hyper/server/struct.Listening.html
+    /// for more information.
+    pub fn serve(self) -> ::HttpResult<::Listening> {
         let host = self.host;
         let port = self.port;
 
         let router = self.route();
 
         println!("Starting HTTP server on http://{}:{}...", host, port);
-        Iron::new(router).http((host, port)).unwrap();
+        Iron::new(router).http((host, port))
     }
 
     /// Register a new sensor.
