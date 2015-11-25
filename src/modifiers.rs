@@ -5,7 +5,7 @@ use ::api;
 use ::api::optional::Optional;
 
 /// `StatusModifier`s are used to modify the status
-pub trait StatusModifier: Send + Sync + Any {
+pub trait StatusModifier: Send + Sync {
     /// Called after all registered sensors are read
     fn modify(&self, status: &mut api::Status);
 }
