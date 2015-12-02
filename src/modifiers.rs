@@ -1,6 +1,5 @@
 /// Modifiers which can be injected by the application logic to change the state
 
-use std::any::Any;
 use ::api;
 use ::api::optional::Optional;
 
