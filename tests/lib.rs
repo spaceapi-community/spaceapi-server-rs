@@ -37,7 +37,7 @@ fn get_status() -> api::Status {
 /// Create a new SpaceapiServer instance listening on the specified port.
 fn get_server(ip: Ipv4Addr, port: u16, status: api::Status) -> SpaceapiServer {
     // Start and return a server instance
-    SpaceapiServer::new(ip, port, status, "redis://127.0.0.1/", vec![]).unwrap()
+    SpaceapiServer::new((ip, port), status, "redis://127.0.0.1/", vec![]).unwrap()
 }
 
 
