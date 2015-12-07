@@ -23,6 +23,7 @@ include = [
 redis = "^0.5"
 rustc-serialize = "^0.3"
 iron = "^0.2"
+hyper = "^0.7"
 log = "^0.3"
 urlencoded = "^0.2"
 router = "^0.0.15"
