@@ -26,8 +26,8 @@ impl ToJson for ErrorResponse {
     /// Serialize an ErrorResponse object into a proper JSON structure.
     fn to_json(&self) -> Json {
         let mut d = BTreeMap::new();
-        d.insert("status".to_string(), "error".to_json());
-        d.insert("reason".to_string(), self.reason.to_json());
+        d.insert("status".into(), "error".to_json());
+        d.insert("reason".into(), self.reason.to_json());
         Json::Object(d)
     }
 }
@@ -140,7 +140,7 @@ impl UpdateHandler {
         let sensor_specs = self.sensor_specs.lock().unwrap();
         let sensor_spec = try!(sensor_specs.iter()
                                .find(|&spec| spec.data_key == sensor)
-                               .ok_or(sensors::SensorError::UnknownSensor(sensor.to_string())));
+                               .ok_or(sensors::SensorError::UnknownSensor(sensor.into())));
 
         // Store data
         sensor_spec.set_sensor_value(&self.redis_connection_info, value)
@@ -157,7 +157,7 @@ impl UpdateHandler {
 
     /// Build an error response with the specified `error_code` and the specified `reason` text.
     fn err_response(&self, error_code: status::Status, reason: &str) -> Response {
-        let error = ErrorResponse { reason: reason.to_string() };
+        let error = ErrorResponse { reason: reason.into() };
         Response::with((error_code, error.to_json().to_string()))
             // Set headers
             .set(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())))
