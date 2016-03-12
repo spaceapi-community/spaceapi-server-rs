@@ -13,7 +13,7 @@ This is a library that allows an easy implementation of a
 
 ## Usage
 
-TODO
+See our [Status-Project](https://github.com/coredump-ch/status) for reference.
 
 
 ## Datastores
