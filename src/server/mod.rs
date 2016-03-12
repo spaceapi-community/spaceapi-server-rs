@@ -1,6 +1,6 @@
 //! The SpaceAPI server struct.
 
-use std::net::Ipv4Addr;
+use std::net::{SocketAddr, ToSocketAddrs};
 use std::sync::{Arc, Mutex};
 
 use iron::Iron;
@@ -14,7 +14,7 @@ use ::api::SensorTemplate;
 
 use ::sensors;
 use ::modifiers;
-use ::errors;
+use ::errors::SpaceapiServerError;
 
 
 /// A Space API server instance.
@@ -25,8 +25,7 @@ use ::errors;
 /// The ``SpaceapiServer`` includes a web server through
 /// [Hyper](http://hyper.rs/hyper/hyper/server/index.html). Simply call the ``serve`` method.
 pub struct SpaceapiServer {
-    host: Ipv4Addr,
-    port: u16,
+    socket_addr: SocketAddr,
     status: api::Status,
     redis_connection_info: ConnectionInfo,
     sensor_specs: sensors::SafeSensorSpecs,
@@ -35,22 +34,23 @@ pub struct SpaceapiServer {
 
 impl SpaceapiServer {
 
-    pub fn new<T>(host: Ipv4Addr, port: u16,
-                  status: api::Status,
-                  redis_connection_info: T,
-                  status_modifiers: Vec<Box<modifiers::StatusModifier>>)
-                  -> Result<SpaceapiServer, errors::SpaceapiServerError>
-                  where T: IntoConnectionInfo {
-
-        Ok(SpaceapiServer {
-            host: host,
-            port: port,
-            status: status,
-            redis_connection_info: try!(redis_connection_info.into_connection_info()),
-            sensor_specs: Arc::new(Mutex::new(vec![])),
-            status_modifiers: status_modifiers,
-        })
-    }
+    pub fn new<U, T>(socket_addr: U,
+                     status: api::Status,
+                     redis_connection_info: T,
+                     status_modifiers: Vec<Box<modifiers::StatusModifier>>)
+        -> Result<SpaceapiServer, SpaceapiServerError>
+        where U: ToSocketAddrs, T: IntoConnectionInfo {
+            let mut socket_addr_iter = try!(socket_addr.to_socket_addrs());
+            let socket_addr = try!(socket_addr_iter.next()
+                                   .ok_or(SpaceapiServerError::Message("Invalid socket address".into())));
+            Ok(SpaceapiServer {
+                socket_addr: socket_addr,
+                status: status,
+                redis_connection_info: try!(redis_connection_info.into_connection_info()),
+                sensor_specs: Arc::new(Mutex::new(vec![])),
+                status_modifiers: status_modifiers,
+            })
+        }
 
     fn route(self) -> Router {
         router!(
@@ -65,13 +65,11 @@ impl SpaceapiServer {
     /// http://ironframework.io/doc/hyper/server/struct.Listening.html
     /// for more information.
     pub fn serve(self) -> ::HttpResult<::Listening> {
-        let host = self.host;
-        let port = self.port;
-
+        let socket_addr = self.socket_addr;
         let router = self.route();
 
-        println!("Starting HTTP server on http://{}:{}...", host, port);
-        Iron::new(router).http((host, port))
+        println!("Starting HTTP server on http://{}...", socket_addr);
+        Iron::new(router).http(socket_addr)
     }
 
     /// Register a new sensor.
