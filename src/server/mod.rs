@@ -10,7 +10,6 @@ use redis::{IntoConnectionInfo, ConnectionInfo};
 mod handlers;
 
 use ::api;
-use ::api::SensorTemplate;
 
 use ::sensors;
 use ::modifiers;
