@@ -13,7 +13,12 @@ This is a library that allows an easy implementation of a
 
 ## Usage
 
-See our [Status-Project](https://github.com/coredump-ch/status) for reference.
+See the `examples` directory or our
+[Status-Project](https://github.com/coredump-ch/status) for reference.
+
+To run the examples from the project directory:
+
+    $ cargo run --example simple
 
 
 ## Datastores
