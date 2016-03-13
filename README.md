@@ -7,7 +7,7 @@
 This is a library that allows an easy implementation of a
 [SpaceAPI](http://spaceapi.net/) v0.13 server in Rust.
 
-- Crate Documentation: https://coredump-ch.github.io/rust-docs/spaceapi-server/spaceapi_server/index.html
+- Crate Documentation: https://coredump-ch.github.io/spaceapi-server-rs/
 - Space API Reference: http://spaceapi.net/documentation
 
 
