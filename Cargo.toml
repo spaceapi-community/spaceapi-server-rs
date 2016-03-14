@@ -1,6 +1,6 @@
 [package]
 name = "spaceapi-server"
-version = "0.1.2"
+version = "0.2.0"
 documentation = "https://coredump-ch.github.io/spaceapi-server-rs/"
 repository = "https://github.com/coredump-ch/spaceapi-server-rs"
 license = "MIT OR Apache-2.0"

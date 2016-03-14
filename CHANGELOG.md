@@ -14,10 +14,15 @@ Possible log types:
 
 ### UNRELEASED
 
+- ...
+
+### v0.2.0 (2016-03-14)
+
 - [changed] Removed datastore module, use Redis directly (#10)
 - [changed] SpaceapiServer.serve() now returns a HttpResult<Listening> (#16)
-- [added] Support status modifiers (#8)
 - [changed] Use `ToSocketAddrs` instead of `IPv4addr` and port in `SpaceapiServer::new()` (#22)
+- [added] Support status modifiers (#8)
+- [added] Add simple examples (#30)
 
 ### v0.1.1 (2015-11-16)
 
