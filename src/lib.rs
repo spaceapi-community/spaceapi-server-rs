@@ -13,7 +13,7 @@ extern crate hyper;
 extern crate router;
 extern crate urlencoded;
 extern crate redis;
-extern crate spaceapi;
+pub extern crate spaceapi;
 
 pub use spaceapi as api;
 pub use iron::error::HttpResult;
