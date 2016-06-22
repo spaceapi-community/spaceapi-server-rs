@@ -72,9 +72,11 @@ impl SpaceapiServer {
     /// for more information.
     pub fn serve(self) -> ::HttpResult<::Listening> {
         let socket_addr = self.socket_addr;
+        let redis_connection_info = self.redis_connection_info.clone();
         let router = self.route();
 
         println!("Starting HTTP server on http://{}...", socket_addr);
+        debug!("Redis connection info: {:?}", &redis_connection_info);
         Iron::new(router).http(socket_addr)
     }
 
