@@ -24,10 +24,10 @@ include = [
 [dependencies]
 redis = "^0.5"
 rustc-serialize = "^0.3"
-iron = "^0.2"
-hyper = "^0.7"
+iron = "^0.3"
+hyper = "^0.8"
 log = "^0.3"
-urlencoded = "^0.2"
+urlencoded = "^0.3"
 router = "^0.1"
 error-type = "^0.1"
 spaceapi = "^0.1"
