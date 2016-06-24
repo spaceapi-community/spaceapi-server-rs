@@ -71,9 +71,12 @@ impl SpaceapiServer {
     /// http://ironframework.io/doc/hyper/server/struct.Listening.html
     /// for more information.
     pub fn serve(self) -> ::HttpResult<::Listening> {
+        // Log some useful debug information
+        debug!("Redis connection info: {:?}", &self.redis_connection_info);
+
+        // Launch server process
         let socket_addr = self.socket_addr;
         let router = self.route();
-
         println!("Starting HTTP server on http://{}...", socket_addr);
         Iron::new(router).http(socket_addr)
     }
