@@ -31,3 +31,6 @@ urlencoded = "^0.3"
 router = "^0.1"
 error-type = "^0.1"
 spaceapi = "^0.1"
+
+[dev-dependencies]
+env_logger = "^0.3"
