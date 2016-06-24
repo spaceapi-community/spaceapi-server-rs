@@ -22,6 +22,9 @@ include = [
 ]
 
 [dependencies]
+r2d2 = "^0.7"
+# TODO: https://github.com/sorccu/r2d2-redis/pull/8
+r2d2_redis = { git = "https://github.com/dbrgn/r2d2-redis", rev = "unwrap" }
 redis = "^0.5"
 rustc-serialize = "^0.3"
 iron = "^0.3"

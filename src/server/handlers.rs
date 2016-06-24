@@ -7,12 +7,12 @@ use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
 use router::Router;
-use redis::ConnectionInfo;
 
 use urlencoded;
 
 use ::api;
 use ::api::optional::Optional;
+use ::types::RedisPool;
 use ::sensors;
 use ::modifiers;
 
@@ -34,20 +34,20 @@ impl ToJson for ErrorResponse {
 
 pub struct ReadHandler {
     status: api::Status,
-    redis_connection_info: ConnectionInfo,
+    redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
     status_modifiers: Vec<Box<modifiers::StatusModifier>>,
 }
 
 impl ReadHandler {
     pub fn new(status: api::Status,
-               redis_connection_info: ConnectionInfo,
+               redis_pool: RedisPool,
                sensor_specs: sensors::SafeSensorSpecs,
                status_modifiers: Vec<Box<modifiers::StatusModifier>>)
                -> ReadHandler {
         ReadHandler {
             status: status,
-            redis_connection_info: redis_connection_info,
+            redis_pool: redis_pool,
             sensor_specs: sensor_specs,
             status_modifiers: status_modifiers,
         }
@@ -61,7 +61,7 @@ impl ReadHandler {
         // Process registered sensors
         for sensor_spec in self.sensor_specs.lock().unwrap().iter() {
 
-            match sensor_spec.get_sensor_value(&self.redis_connection_info) {
+            match sensor_spec.get_sensor_value(self.redis_pool.clone()) {
 
                 // Value could be read successfullly
                 Ok(value) => {
@@ -76,12 +76,11 @@ impl ReadHandler {
 
                 // Value could not be read, do error logging
                 Err(err) => {
+                    warn!("Could not retrieve key '{}' from Redis, omiting the sensor", &sensor_spec.data_key);
                     match err {
-                        sensors::SensorError::Redis(e) => {
-                            warn!("Could not retrieve key '{}' from Redis, omiting the sensor", &sensor_spec.data_key);
-                            debug!("Error: {:?}", e);
-                        },
-                        _ =>  error!("Could not retrieve sensor '{}', unknown error.", &sensor_spec.data_key)
+                        sensors::SensorError::Redis(e) => debug!("Error: {:?}", e),
+                        sensors::SensorError::R2d2(e) => debug!("Error: {:?}", e),
+                        sensors::SensorError::UnknownSensor(e) => warn!("Error: {:?}", e),
                     }
                 },
             }
@@ -120,16 +119,16 @@ impl middleware::Handler for ReadHandler {
 
 
 pub struct UpdateHandler {
-    redis_connection_info: ConnectionInfo,
+    redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
 }
 
 
 impl UpdateHandler {
-    pub fn new(redis_connection_info: ConnectionInfo, sensor_specs: sensors::SafeSensorSpecs)
+    pub fn new(redis_pool: RedisPool, sensor_specs: sensors::SafeSensorSpecs)
                -> UpdateHandler {
         UpdateHandler {
-            redis_connection_info: redis_connection_info,
+            redis_pool: redis_pool,
             sensor_specs: sensor_specs,
         }
     }
@@ -143,7 +142,7 @@ impl UpdateHandler {
                                .ok_or(sensors::SensorError::UnknownSensor(sensor.into())));
 
         // Store data
-        sensor_spec.set_sensor_value(&self.redis_connection_info, value)
+        sensor_spec.set_sensor_value(self.redis_pool.clone(), value)
     }
 
     /// Build an OK response with the `HTTP 204 No Content` status code.
@@ -202,7 +201,7 @@ impl middleware::Handler for UpdateHandler {
             let response = match e {
                 sensors::SensorError::UnknownSensor(sensor) =>
                     self.err_response(status::BadRequest, &format!("Unknown sensor: {}", sensor)),
-                sensors::SensorError::Redis(_) =>
+                sensors::SensorError::Redis(_) | sensors::SensorError::R2d2(_) =>
                     self.err_response(status::InternalServerError, "Updating values in datastore failed"),
             };
             return Ok(response)
