@@ -2,10 +2,12 @@
 
 use std::sync::{Arc, Mutex};
 
-use redis::{ConnectionInfo, Client, Connection, Commands};
-use redis::{RedisResult, RedisError};
+use r2d2;
+use redis::Commands;
+use redis::RedisError;
 
 use ::api;
+use ::types::RedisPool;
 
 /// A specification of a sensor.
 ///
@@ -27,6 +29,9 @@ error_type! {
         },
         Redis(RedisError) {
             cause;
+        },
+        R2d2(r2d2::GetTimeout) {
+            cause;
         }
     }
 }
@@ -37,24 +42,16 @@ pub type SafeSensorSpecs = Arc<Mutex<Vec<SensorSpec>>>;
 
 impl SensorSpec {
 
-    /// Return the Redis connection.
-    ///
-    /// TODO: Clones the `ConnectionInfo` for now, see https://github.com/mitsuhiko/redis-rs/issues/74
-    fn get_redis_connection(&self, redis_connection_info: &ConnectionInfo) -> RedisResult<Connection> {
-        let client = try!(Client::open(redis_connection_info.clone()));
-        client.get_connection()
-    }
-
     /// Retrieve sensor value from Redis.
-    pub fn get_sensor_value(&self, redis_connection_info: &ConnectionInfo) -> Result<String, SensorError> {
-        let conn = try!(self.get_redis_connection(redis_connection_info));
+    pub fn get_sensor_value(&self, redis_pool: RedisPool) -> Result<String, SensorError> {
+        let conn = try!(redis_pool.get());
         let value: String = try!(conn.get(&*self.data_key));
         Ok(value)
     }
 
     /// Set sensor value in Redis.
-    pub fn set_sensor_value(&self, redis_connection_info: &ConnectionInfo, value: &str) -> Result<(), SensorError> {
-        let conn = try!(self.get_redis_connection(redis_connection_info));
+    pub fn set_sensor_value(&self, redis_pool: RedisPool, value: &str) -> Result<(), SensorError> {
+        let conn = try!(redis_pool.get());
         let _: String = try!(conn.set(&*self.data_key, value));
         Ok(())
     }

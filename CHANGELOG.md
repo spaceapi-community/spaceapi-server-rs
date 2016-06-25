@@ -14,6 +14,7 @@ Possible log types:
 
 ### UNRELEASED
 
+- [changed] Introduced internal Redis connection pooling (#42)
 - ...
 
 ### v0.2.0 (2016-03-14)

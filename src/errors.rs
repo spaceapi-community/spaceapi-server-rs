@@ -4,6 +4,7 @@
 //! https://github.com/DanielKeep/rust-error-type/issues/2.
 
 use redis::RedisError;
+use r2d2::InitializationError;
 use std::io;
 use std::borrow::Cow;
 
@@ -13,6 +14,9 @@ error_type! {
     #[derive(Debug)]
     pub enum SpaceapiServerError {
         Redis(RedisError) {
+            cause;
+        },
+        R2d2(InitializationError) {
             cause;
         },
         IoError(io::Error) {

@@ -12,6 +12,8 @@ extern crate iron;
 extern crate hyper;
 extern crate router;
 extern crate urlencoded;
+extern crate r2d2;
+extern crate r2d2_redis;
 extern crate redis;
 pub extern crate spaceapi as api;
 
@@ -20,6 +22,7 @@ pub use hyper::server::Listening;
 
 mod server;
 mod errors;
+mod types;
 pub mod sensors;
 pub mod modifiers;
 
