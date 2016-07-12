@@ -4,6 +4,7 @@
 [![Test Coverage](https://img.shields.io/coveralls/coredump-ch/spaceapi-server-rs/master.svg)](https://coveralls.io/github/coredump-ch/spaceapi-server-rs)
 [![Crates.io Version](https://img.shields.io/crates/v/spaceapi-server.svg)](https://crates.io/crates/spaceapi-server)
 [![Crates.io Downloads](https://img.shields.io/crates/d/spaceapi-server.svg)](https://crates.io/crates/spaceapi-server)
+[![Dependency Status](https://dependencyci.com/github/coredump-ch/spaceapi-server-rs/badge)](https://dependencyci.com/github/coredump-ch/spaceapi-server-rs)
 
 This is a library that allows an easy implementation of a
 [SpaceAPI](http://spaceapi.net/) v0.13 server in Rust.
