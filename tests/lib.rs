@@ -6,7 +6,7 @@ use std::io::ErrorKind;
 
 use spaceapi_server::SpaceapiServer;
 use spaceapi_server::api;
-use spaceapi_server::api::optional::Optional;
+use spaceapi_server::api::optional::Optional::{Absent, Value};
 
 
 /// Create a new status object containing test data.
@@ -16,15 +16,15 @@ fn get_status() -> api::Status {
         "https://example.com/logo.png",
         "https://example.com/",
         api::Location {
-            address: Optional::Value("Street 1, Zürich, Switzerland".into()),
+            address: Value("Street 1, Zürich, Switzerland".into()),
             lat: 47.123,
             lon: 8.88,
         },
         api::Contact {
-            irc: Optional::Absent,
-            twitter: Optional::Absent,
-            foursquare: Optional::Absent,
-            email: Optional::Value("hi@example.com".into()),
+            irc: Absent,
+            twitter: Absent,
+            foursquare: Absent,
+            email: Value("hi@example.com".into()),
         },
         vec![
             "email".into(),
