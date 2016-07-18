@@ -33,6 +33,10 @@ urlencoded = "^0.3"
 router = "^0.1"
 error-type = "^0.1"
 spaceapi = "^0.3"
+clippy = {version = "*", optional = true}
+
+[features]
+unstable = ["clippy"]
 
 [dev-dependencies]
 env_logger = "^0.3"
