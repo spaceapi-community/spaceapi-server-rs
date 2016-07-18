@@ -12,10 +12,10 @@ Possible log types:
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
 
-### UNRELEASED
+### v0.3.0 UNRELEASED
 
 - [changed] Introduced internal Redis connection pooling (#42)
-- ...
+- [changed] Updated spaceapi dependency to 0.3 (#46)
 
 ### v0.2.0 (2016-03-14)
 
