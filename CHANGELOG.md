@@ -18,6 +18,8 @@ Possible log types:
 - [changed] Updated spaceapi dependency to 0.3 (#46)
 - [added] Top level `get_version` function (#4)
 - [added] Add `LibraryVersions` status modifier (#4)
+- [changed] Updated hyper dependency to 0.9 (#51)
+- [changed] Updated iron dependency to 0.4 (#51)
 
 ### v0.2.0 (2016-03-14)
 
