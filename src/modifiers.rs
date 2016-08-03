@@ -1,5 +1,7 @@
 /// Modifiers which can be injected by the application logic to change the state
 
+use std::collections::HashMap;
+
 use ::api;
 use ::api::optional::Optional;
 
@@ -9,6 +11,8 @@ pub trait StatusModifier: Send + Sync {
     fn modify(&self, status: &mut api::Status);
 }
 
+/// This modifier updates the opening state based on the
+/// people now present sensor.
 pub struct StateFromPeopleNowPresent;
 
 impl StatusModifier for StateFromPeopleNowPresent {
@@ -29,3 +33,26 @@ impl StatusModifier for StateFromPeopleNowPresent {
     }
 }
 
+/// This modifier adds internal version information to the output.
+pub struct LibraryVersions;
+
+impl StatusModifier for LibraryVersions {
+    fn modify(&self, status: &mut api::Status) {
+        // Add library version information
+        let api_version = api::get_version().to_string();
+        let server_version = ::get_version().to_string();
+
+        // Create version map if it doesn't exist yet
+        if status.ext_versions.is_absent() {
+            status.ext_versions = Optional::Value(HashMap::new());
+        }
+
+        // Add to map
+        // TODO: Simplify this stuff once spaceapi-rs moved to serde
+        // and doesn't need Optional anymore.
+        if let Optional::Value(ref mut map) = status.ext_versions {
+            map.insert("spaceapi-rs".to_string(), api_version);
+            map.insert("spaceapi-server-rs".to_string(), server_version);
+        }
+    }
+}

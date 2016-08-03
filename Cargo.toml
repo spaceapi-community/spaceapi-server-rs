@@ -32,7 +32,7 @@ log = "^0.3"
 urlencoded = "^0.3"
 router = "^0.1"
 error-type = "^0.1"
-spaceapi = "^0.3"
+spaceapi = "^0.3.1"
 clippy = {version = "*", optional = true}
 
 [features]
