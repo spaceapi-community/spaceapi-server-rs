@@ -16,6 +16,7 @@ Possible log types:
 
 - [changed] Introduced internal Redis connection pooling (#42)
 - [changed] Updated spaceapi dependency to 0.3 (#46)
+- [added] Top level `get_version` function (#4)
 
 ### v0.2.0 (2016-03-14)
 
