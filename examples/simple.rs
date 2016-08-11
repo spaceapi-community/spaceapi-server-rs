@@ -3,6 +3,7 @@ extern crate spaceapi_server;
 use spaceapi_server::SpaceapiServer;
 use spaceapi_server::api;
 use spaceapi_server::api::Optional::{Value, Absent};
+use spaceapi_server::modifiers;
 
 
 fn main() {
@@ -41,7 +42,9 @@ fn main() {
     // Set up server
     let listen = "127.0.0.1:8000";
     let redis = "redis://127.0.0.1/";
-    let modifiers = Vec::new();
+    let modifiers: Vec<Box<modifiers::StatusModifier + 'static>> = vec![
+        Box::new(modifiers::LibraryVersions),
+    ];
     let server = SpaceapiServer::new(listen, status, redis, modifiers);
 
     // Serve!
