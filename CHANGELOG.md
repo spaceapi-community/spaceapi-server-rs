@@ -20,7 +20,7 @@ Possible log types:
 
 - [added] Top level `get_version` function (#4)
 - [added] Add `LibraryVersions` status modifier (#4)
-- [changed] Introduced internal Redis connection pooling (#42)
+- [changed] Introduced internal Redis connection pooling (#43)
 - [changed] Updated spaceapi dependency to 0.3 (#46)
 - [changed] Updated hyper dependency to 0.9 (#51)
 - [changed] Updated iron dependency to 0.4 (#51)
