@@ -100,7 +100,7 @@ impl middleware::Handler for ReadHandler {
     /// Return the current status JSON.
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
 
-        info!("{} /{} from {}", req.method, req.url.path[0], req.remote_addr);
+        info!("{} /{} from {}", req.method, req.url.path()[0], req.remote_addr);
 
         // Get response body
         let body = self.build_response_json().to_string();
@@ -172,7 +172,7 @@ impl middleware::Handler for UpdateHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
 
         // TODO: create macro for these info! invocations.
-        info!("{} /{} from {}", req.method, req.url.path[0], req.remote_addr);
+        info!("{} /{} from {}", req.method, req.url.path()[0], req.remote_addr);
 
         // Get sensor name
         let sensor_name;
