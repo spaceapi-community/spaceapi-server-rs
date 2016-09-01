@@ -16,9 +16,10 @@ include = [
     "**/*.rs",
     "Cargo.toml",
     "README.md",
+    "CHANGELOG.md",
+    "AUTHORS.md",
     "LICENSE-MIT",
     "LICENSE-APACHE",
-    "AUTHORS.md",
 ]
 
 [dependencies]
