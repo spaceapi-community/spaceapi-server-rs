@@ -16,6 +16,10 @@ Possible log types:
 
 - ...
 
+### v0.3.1 (2016-09-02)
+
+- [fixed] Removed star version dependency in `Cargo.toml` preventing publication (#55)
+
 ### v0.3.0 (2016-09-01)
 
 - [added] Top level `get_version` function (#4)
