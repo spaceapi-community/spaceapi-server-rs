@@ -34,7 +34,7 @@ urlencoded = "^0.4"
 router = "^0.2"
 error-type = "^0.1"
 spaceapi = "^0.3.1"
-clippy = {version = "*", optional = true}
+clippy = {version = "^0.0.87", optional = true}
 
 [features]
 unstable = ["clippy"]
