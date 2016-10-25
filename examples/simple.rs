@@ -2,7 +2,6 @@ extern crate spaceapi_server;
 
 use spaceapi_server::SpaceapiServer;
 use spaceapi_server::api;
-use spaceapi_server::api::Optional::{Value, Absent};
 use spaceapi_server::modifiers;
 
 
@@ -14,24 +13,24 @@ fn main() {
         "https://www.coredump.ch/logo.png",
         "https://www.coredump.ch/",
         api::Location {
-            address: Value("Spinnereistrasse 2, 8640 Rapperswil, Switzerland".into()),
+            address: Some("Spinnereistrasse 2, 8640 Rapperswil, Switzerland".into()),
             lat: 47.22936,
             lon: 8.82949,
         },
         api::Contact {
-            irc: Value("irc://freenode.net/#coredump".into()),
-            twitter: Value("@coredump_ch".into()),
-            foursquare: Absent,
-            email: Absent,
-            ml: Absent,
-            phone: Absent,
-            jabber: Absent,
-            issue_mail: Absent,
-            identica: Absent,
-            facebook: Absent,
-            google: Absent,
-            keymasters: Absent,
-            sip: Absent,
+            irc: Some("irc://freenode.net/#coredump".into()),
+            twitter: Some("@coredump_ch".into()),
+            foursquare: None,
+            email: None,
+            ml: None,
+            phone: None,
+            jabber: None,
+            issue_mail: None,
+            identica: None,
+            facebook: None,
+            google: None,
+            keymasters: None,
+            sip: None,
         },
         vec![
             "email".into(),
