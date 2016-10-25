@@ -33,7 +33,8 @@ log = "^0.3"
 urlencoded = "^0.4"
 router = "^0.2"
 error-type = "^0.1"
-spaceapi = "^0.3.1"
+serde_json = "^0.8"
+spaceapi = "^0.4"
 clippy = {version = "^0.0.87", optional = true}
 
 [features]

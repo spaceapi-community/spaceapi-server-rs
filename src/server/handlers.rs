@@ -3,6 +3,7 @@
 use std::collections::BTreeMap;
 
 use rustc_serialize::json::{Json, ToJson};
+use serde_json;
 use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
@@ -11,7 +12,6 @@ use router::Router;
 use urlencoded;
 
 use ::api;
-use ::api::optional::Optional;
 use ::types::RedisPool;
 use ::sensors;
 use ::modifiers;
@@ -65,10 +65,10 @@ impl ReadHandler {
 
                 // Value could be read successfullly
                 Ok(value) => {
-                    if status_copy.sensors.is_absent() {
-                        status_copy.sensors = Optional::Value(api::Sensors {
-                            people_now_present: Optional::Absent,
-                            temperature: Optional::Absent,
+                    if status_copy.sensors.is_none() {
+                        status_copy.sensors = Some(api::Sensors {
+                            people_now_present: None,
+                            temperature: None,
                         });
                     }
                     sensor_spec.template.to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
@@ -91,7 +91,9 @@ impl ReadHandler {
         }
 
         // Serialize to JSON
-        status_copy.to_json()
+        // TODO this seems cumbersome
+        let json_string = serde_json::to_string(&status_copy).unwrap();
+        json_string.to_json()
     }
 }
 
