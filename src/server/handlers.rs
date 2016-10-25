@@ -53,7 +53,7 @@ impl ReadHandler {
         }
     }
 
-    fn build_response_json(&self) -> Json {
+    fn build_response_json(&self) -> String {
 
         // Create a mutable copy of the status struct
         let mut status_copy = self.status.clone();
@@ -91,9 +91,8 @@ impl ReadHandler {
         }
 
         // Serialize to JSON
-        // TODO this seems cumbersome
-        let json_string = serde_json::to_string(&status_copy).unwrap();
-        json_string.to_json()
+        // TODO Using unwrap may be unsound here
+        serde_json::to_string(&status_copy).unwrap()
     }
 }
 
@@ -105,7 +104,7 @@ impl middleware::Handler for ReadHandler {
         info!("{} /{} from {}", req.method, req.url.path()[0], req.remote_addr);
 
         // Get response body
-        let body = self.build_response_json().to_string();
+        let body = self.build_response_json();
 
         // Create response
         let response = Response::with((status::Ok, body))
