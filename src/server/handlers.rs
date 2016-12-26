@@ -91,8 +91,9 @@ impl ReadHandler {
         }
 
         // Serialize to JSON
-        // TODO Using unwrap may be unsound here
-        serde_json::to_string(&status_copy).unwrap()
+        serde_json::to_string(&status_copy)
+            .expect("Status object could not be serialized to JSON. \
+                     Please open an issue at https://github.com/coredump-ch/spaceapi-server-rs/issues")
     }
 }
 
