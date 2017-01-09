@@ -3,6 +3,7 @@
 use std::collections::BTreeMap;
 
 use rustc_serialize::json::{Json, ToJson};
+use serde_json;
 use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
@@ -11,7 +12,6 @@ use router::Router;
 use urlencoded;
 
 use ::api;
-use ::api::optional::Optional;
 use ::types::RedisPool;
 use ::sensors;
 use ::modifiers;
@@ -53,7 +53,7 @@ impl ReadHandler {
         }
     }
 
-    fn build_response_json(&self) -> Json {
+    fn build_response_json(&self) -> String {
 
         // Create a mutable copy of the status struct
         let mut status_copy = self.status.clone();
@@ -65,10 +65,10 @@ impl ReadHandler {
 
                 // Value could be read successfullly
                 Ok(value) => {
-                    if status_copy.sensors.is_absent() {
-                        status_copy.sensors = Optional::Value(api::Sensors {
-                            people_now_present: Optional::Absent,
-                            temperature: Optional::Absent,
+                    if status_copy.sensors.is_none() {
+                        status_copy.sensors = Some(api::Sensors {
+                            people_now_present: None,
+                            temperature: None,
                         });
                     }
                     sensor_spec.template.to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
@@ -91,7 +91,9 @@ impl ReadHandler {
         }
 
         // Serialize to JSON
-        status_copy.to_json()
+        serde_json::to_string(&status_copy)
+            .expect("Status object could not be serialized to JSON. \
+                     Please open an issue at https://github.com/coredump-ch/spaceapi-server-rs/issues")
     }
 }
 
@@ -103,7 +105,7 @@ impl middleware::Handler for ReadHandler {
         info!("{} /{} from {}", req.method, req.url.path()[0], req.remote_addr);
 
         // Get response body
-        let body = self.build_response_json().to_string();
+        let body = self.build_response_json();
 
         // Create response
         let response = Response::with((status::Ok, body))
