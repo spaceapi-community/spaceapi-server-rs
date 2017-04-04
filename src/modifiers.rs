@@ -18,8 +18,7 @@ impl StatusModifier for StateFromPeopleNowPresent {
     fn modify(&self, status: &mut api::Status) {
         // Update state depending on number of people present
         let people_now_present: Option<u64> = status.sensors.as_ref()
-            .and_then(|sensors| sensors.people_now_present.as_ref())
-            .map(|people_now_present| people_now_present[0].value)
+            .map(|sensors| sensors.people_now_present[0].value)
             .into();
         if let Some(count) = people_now_present {
             status.state.open = Some(count > 0);

@@ -11,35 +11,23 @@ fn main() {
     env_logger::init().unwrap();
 
     // Create new minimal Status instance
-    let status = api::Status::new(
-        "coredump",
-        "https://www.coredump.ch/logo.png",
-        "https://www.coredump.ch/",
-        api::Location {
+    let status = api::StatusBuilder::new("coredump")
+        .logo("https://www.coredump.ch/logo.png")
+        .url("https://www.coredump.ch/")
+        .location(api::Location {
             address: Some("Spinnereistrasse 2, 8640 Rapperswil, Switzerland".into()),
             lat: 47.22936,
             lon: 8.82949,
-        },
-        api::Contact {
+        })
+        .contact(api::Contact {
             irc: Some("irc://freenode.net/#coredump".into()),
             twitter: Some("@coredump_ch".into()),
-            foursquare: None,
-            email: None,
-            ml: None,
-            phone: None,
-            jabber: None,
-            issue_mail: None,
-            identica: None,
-            facebook: None,
-            google: None,
-            keymasters: None,
-            sip: None,
-        },
-        vec![
-            "email".into(),
-            "twitter".into(),
-        ],
-    );
+            ..Default::default()
+        })
+        .add_issue_report_channel("email")
+        .add_issue_report_channel("twitter")
+        .build()
+        .expect("Creating status failed");
 
     // Set up server
     let listen = "127.0.0.1:8000";

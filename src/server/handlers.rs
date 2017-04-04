@@ -67,8 +67,8 @@ impl ReadHandler {
                 Ok(value) => {
                     if status_copy.sensors.is_none() {
                         status_copy.sensors = Some(api::Sensors {
-                            people_now_present: None,
-                            temperature: None,
+                            people_now_present: vec![],
+                            temperature: vec![],
                         });
                     }
                     sensor_spec.template.to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
