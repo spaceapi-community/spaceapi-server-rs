@@ -45,3 +45,6 @@ unstable = ["clippy"]
 
 [dev-dependencies]
 env_logger = "^0.3"
+
+[features]
+nightly = ["unstable"]
