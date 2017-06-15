@@ -86,10 +86,10 @@ impl SpaceapiServer {
 
         router.get("/", handlers::ReadHandler::new(
             self.status.clone(), self.redis_pool.clone(),
-            self.sensor_specs.clone(), self.status_modifiers));
+            self.sensor_specs.clone(), self.status_modifiers), "root");
 
         router.put("/sensors/:sensor/", handlers::UpdateHandler::new(
-            self.redis_pool.clone(), self.sensor_specs.clone()));
+            self.redis_pool.clone(), self.sensor_specs.clone()), "sensors");
 
         router
     }
