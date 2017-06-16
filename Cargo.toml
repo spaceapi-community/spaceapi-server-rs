@@ -37,7 +37,7 @@ router = "^0.5"
 error-type = "^0.1"
 serde_json = "^0.8"
 spaceapi = "^0.4.2"
-clippy = {version = "^0.0.87", optional = true}
+clippy = {version = "^0.0", optional = true}
 
 [features]
 unstable = ["clippy"]
