@@ -13,7 +13,6 @@
 extern crate rustc_serialize;
 extern crate serde_json;
 extern crate iron;
-extern crate hyper;
 extern crate router;
 extern crate urlencoded;
 extern crate r2d2;
@@ -22,7 +21,7 @@ extern crate redis;
 pub extern crate spaceapi as api;
 
 pub use iron::error::HttpResult;
-pub use hyper::server::Listening;
+pub use iron::Listening;
 
 mod server;
 mod errors;
