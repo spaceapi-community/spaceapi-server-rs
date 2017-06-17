@@ -3,7 +3,6 @@
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use std::fmt::Debug;
 
 use r2d2;
 use r2d2_redis::RedisConnectionManager;
@@ -70,10 +69,35 @@ impl SpaceapiServerBuilder {
     }
 
     pub fn build(self) -> Result<SpaceapiServer, SpaceapiServerError> {
-        SpaceapiServer::new(self.socket_addr?,
-                            self.status,
-                            self.redis_connection_info?,
-                            self.status_modifiers)
+        // Log some useful debug information
+        debug!("Redis connection info: {:?}", &self.redis_connection_info);
+
+        // Create redis pool
+        let redis_config = r2d2::Config::builder()
+            // Provide up to 6 connections in connection pool
+            .pool_size(6)
+            // At least 1 connection must be active
+            .min_idle(Some(2))
+            // Initialize connection pool lazily. This allows the SpaceAPI
+            // server to work even without a database connection.
+            .initialization_fail_fast(false)
+            // Try to get a connection for max 1 second
+            .connection_timeout(Duration::from_secs(1))
+            // Don't log errors directly.
+            // They can get quite verbose, and we're already catching and
+            // logging the corresponding results anyways.
+            .error_handler(Box::new(r2d2::NopErrorHandler))
+            .build();
+        let redis_manager = try!(RedisConnectionManager::new(self.redis_connection_info?));
+        let pool = try!(r2d2::Pool::new(redis_config, redis_manager));
+
+        Ok(SpaceapiServer {
+            socket_addr: self.socket_addr?,
+            status: self.status,
+            redis_pool: pool,
+            sensor_specs: self.sensor_specs,
+            status_modifiers: self.status_modifiers,
+        })
     }
 }
 
@@ -94,48 +118,6 @@ pub struct SpaceapiServer {
 }
 
 impl SpaceapiServer {
-
-    pub fn new<U, T>(socket_addr: U,
-                     status: api::Status,
-                     redis_connection_info: T,
-                     status_modifiers: Vec<Box<modifiers::StatusModifier>>)
-        -> Result<SpaceapiServer, SpaceapiServerError>
-        where U: ToSocketAddrs, T: IntoConnectionInfo + Debug {
-            // Get socket addr
-            let mut socket_addr_iter = try!(socket_addr.to_socket_addrs());
-            let socket_addr = try!(socket_addr_iter.next()
-                                   .ok_or(SpaceapiServerError::Message("Invalid socket address".into())));
-
-            // Log some useful debug information
-            debug!("Redis connection info: {:?}", &redis_connection_info);
-
-            // Create redis pool
-            let redis_config = r2d2::Config::builder()
-                // Provide up to 6 connections in connection pool
-                .pool_size(6)
-                // At least 1 connection must be active
-                .min_idle(Some(2))
-                // Initialize connection pool lazily. This allows the SpaceAPI
-                // server to work even without a database connection.
-                .initialization_fail_fast(false)
-                // Try to get a connection for max 1 second
-                .connection_timeout(Duration::from_secs(1))
-                // Don't log errors directly.
-                // They can get quite verbose, and we're already catching and
-                // logging the corresponding results anyways.
-                .error_handler(Box::new(r2d2::NopErrorHandler))
-                .build();
-            let redis_manager = try!(RedisConnectionManager::new(redis_connection_info));
-            let pool = try!(r2d2::Pool::new(redis_config, redis_manager));
-
-            Ok(SpaceapiServer {
-                socket_addr: socket_addr,
-                status: status,
-                redis_pool: pool,
-                sensor_specs: Arc::new(Mutex::new(vec![])),
-                status_modifiers: status_modifiers,
-            })
-        }
 
     /// Create and return a Router instance.
     fn route(self) -> Router {

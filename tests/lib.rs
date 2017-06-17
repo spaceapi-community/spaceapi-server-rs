@@ -4,7 +4,7 @@ use std::net::Ipv4Addr;
 use std::net::TcpStream;
 use std::io::ErrorKind;
 
-use spaceapi_server::SpaceapiServer;
+use spaceapi_server::{SpaceapiServer, SpaceapiServerBuilder};
 use spaceapi_server::api;
 
 
@@ -42,8 +42,11 @@ fn get_status() -> api::Status {
 
 /// Create a new SpaceapiServer instance listening on the specified port.
 fn get_server(ip: Ipv4Addr, port: u16, status: api::Status) -> SpaceapiServer {
-    // Start and return a server instance
-    SpaceapiServer::new((ip, port), status, "redis://127.0.0.1/", vec![]).unwrap()
+    SpaceapiServerBuilder::new(status)
+        .socket_addr((ip, port))
+        .redis_connection_info("redis://127.0.0.1/")
+        .build()
+        .unwrap()
 }
 
 

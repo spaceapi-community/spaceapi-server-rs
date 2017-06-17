@@ -1,6 +1,6 @@
 extern crate spaceapi_server;
 
-use spaceapi_server::SpaceapiServer;
+use spaceapi_server::SpaceapiServerBuilder;
 use spaceapi_server::api;
 use spaceapi_server::modifiers;
 
@@ -27,13 +27,13 @@ fn main() {
         .expect("Creating status failed");
 
     // Set up server
-    let listen = "127.0.0.1:8000";
-    let redis = "redis://127.0.0.1/";
-    let modifiers: Vec<Box<modifiers::StatusModifier + 'static>> = vec![
-        Box::new(modifiers::LibraryVersions),
-    ];
-    let server = SpaceapiServer::new(listen, status, redis, modifiers);
+    let server = SpaceapiServerBuilder::new(status)
+        .socket_addr("127.0.0.1:8000")
+        .redis_connection_info("redis://127.0.0.1/")
+        .add_status_modifier(modifiers::LibraryVersions)
+        .build()
+        .unwrap();
 
     // Serve!
-    let _ = server.unwrap().serve();
+    let _ = server.serve();
 }

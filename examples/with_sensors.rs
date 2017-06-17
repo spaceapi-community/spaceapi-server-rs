@@ -1,7 +1,7 @@
 extern crate spaceapi_server;
 extern crate env_logger;
 
-use spaceapi_server::SpaceapiServer;
+use spaceapi_server::SpaceapiServerBuilder;
 use spaceapi_server::api;
 use spaceapi_server::api::sensors::PeopleNowPresentSensorTemplate;
 use spaceapi_server::modifiers::{StatusModifier, StateFromPeopleNowPresent};
@@ -30,19 +30,18 @@ fn main() {
         .expect("Creating status failed");
 
     // Set up server
-    let listen = "127.0.0.1:8000";
-    let redis = "redis://127.0.0.1/";
-    let modifiers: Vec<Box<StatusModifier + 'static>> = vec![Box::new(StateFromPeopleNowPresent)];
-    let mut server = SpaceapiServer::new(listen, status, redis, modifiers)
-                                    .expect("Could not initialize server");
-
-    // Register sensors
-    server.register_sensor(Box::new(PeopleNowPresentSensorTemplate {
-        location: Some("Hackerspace".into()),
-        name: None,
-        description: None,
-        names: None,
-    }), "people_now_present".into());
+    let server = SpaceapiServerBuilder::new(status)
+        .socket_addr("127.0.0.1:8000")
+        .redis_connection_info("redis://127.0.0.1/")
+        .add_status_modifier(StateFromPeopleNowPresent)
+        .add_sensor(Box::new(PeopleNowPresentSensorTemplate {
+            location: Some("Hackerspace".into()),
+            name: None,
+            description: None,
+            names: None,
+        }), "people_now_present".into())
+        .build()
+        .expect("Could not initialize server");
 
     // Serve!
     server.serve().expect("Could not start the server");
