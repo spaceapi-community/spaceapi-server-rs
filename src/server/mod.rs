@@ -1,6 +1,6 @@
 //! The SpaceAPI server struct.
 
-use std::net::{SocketAddr, ToSocketAddrs};
+use std::net::ToSocketAddrs;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -21,7 +21,6 @@ use ::types::RedisPool;
 
 pub struct SpaceapiServerBuilder {
     status: api::Status,
-    socket_addr: Result<SocketAddr, SpaceapiServerError>,
     redis_connection_info: Result<ConnectionInfo, SpaceapiServerError>,
     sensor_specs: sensors::SafeSensorSpecs,
     status_modifiers: Vec<Box<modifiers::StatusModifier>>,
@@ -32,18 +31,10 @@ impl SpaceapiServerBuilder {
     pub fn new(status: api::Status) -> SpaceapiServerBuilder {
         SpaceapiServerBuilder {
             status: status,
-            socket_addr: Err("socket_addr missing".into()),
             redis_connection_info: Err("redis_connection_info missing".into()),
             sensor_specs: Arc::new(Mutex::new(vec![])),
             status_modifiers: vec![],
         }
-    }
-
-    pub fn socket_addr<S: ToSocketAddrs>(mut self, socket_addr: S) -> Self {
-        self.socket_addr = socket_addr.to_socket_addrs()
-            .map_err(|e| e.into())
-            .and_then(|mut i| i.next().ok_or("Invalid socket address".into()));
-        self
     }
 
     pub fn redis_connection_info<R: IntoConnectionInfo>(mut self, redis_connection_info: R) -> Self {
@@ -92,7 +83,6 @@ impl SpaceapiServerBuilder {
         let pool = try!(r2d2::Pool::new(redis_config, redis_manager));
 
         Ok(SpaceapiServer {
-            socket_addr: self.socket_addr?,
             status: self.status,
             redis_pool: pool,
             sensor_specs: self.sensor_specs,
@@ -110,7 +100,6 @@ impl SpaceapiServerBuilder {
 /// The ``SpaceapiServer`` includes a web server through
 /// [Hyper](http://hyper.rs/hyper/hyper/server/index.html). Simply call the ``serve`` method.
 pub struct SpaceapiServer {
-    socket_addr: SocketAddr,
     status: api::Status,
     redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
@@ -138,11 +127,13 @@ impl SpaceapiServer {
     /// The call returns an `HttpResult<Listening>` object, see
     /// http://ironframework.io/doc/hyper/server/struct.Listening.html
     /// for more information.
-    pub fn serve(self) -> ::HttpResult<::Listening> {
+    pub fn serve<S: ToSocketAddrs>(self, socket_addr: S) -> ::HttpResult<::Listening> {
         // Launch server process
-        let socket_addr = self.socket_addr;
         let router = self.route();
-        println!("Starting HTTP server on http://{}...", socket_addr);
+        println!("Starting HTTP server on:");
+        for a in socket_addr.to_socket_addrs()? {
+            println!("\thttp://{}", a);
+        }
         Iron::new(router).http(socket_addr)
     }
 

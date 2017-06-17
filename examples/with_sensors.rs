@@ -4,8 +4,7 @@ extern crate env_logger;
 use spaceapi_server::SpaceapiServerBuilder;
 use spaceapi_server::api;
 use spaceapi_server::api::sensors::PeopleNowPresentSensorTemplate;
-use spaceapi_server::modifiers::{StatusModifier, StateFromPeopleNowPresent};
-
+use spaceapi_server::modifiers::StateFromPeopleNowPresent;
 
 fn main() {
     env_logger::init().unwrap();
@@ -31,7 +30,6 @@ fn main() {
 
     // Set up server
     let server = SpaceapiServerBuilder::new(status)
-        .socket_addr("127.0.0.1:8000")
         .redis_connection_info("redis://127.0.0.1/")
         .add_status_modifier(StateFromPeopleNowPresent)
         .add_sensor(Box::new(PeopleNowPresentSensorTemplate {
@@ -44,5 +42,5 @@ fn main() {
         .expect("Could not initialize server");
 
     // Serve!
-    server.serve().expect("Could not start the server");
+    server.serve("127.0.0.1:8000").expect("Could not start the server");
 }

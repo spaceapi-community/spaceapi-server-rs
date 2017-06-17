@@ -28,12 +28,11 @@ fn main() {
 
     // Set up server
     let server = SpaceapiServerBuilder::new(status)
-        .socket_addr("127.0.0.1:8000")
         .redis_connection_info("redis://127.0.0.1/")
         .add_status_modifier(modifiers::LibraryVersions)
         .build()
         .unwrap();
 
     // Serve!
-    let _ = server.serve();
+    let _ = server.serve("127.0.0.1:8000");
 }

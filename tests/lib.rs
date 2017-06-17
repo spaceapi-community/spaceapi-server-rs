@@ -41,9 +41,8 @@ fn get_status() -> api::Status {
 
 
 /// Create a new SpaceapiServer instance listening on the specified port.
-fn get_server(ip: Ipv4Addr, port: u16, status: api::Status) -> SpaceapiServer {
+fn get_server(status: api::Status) -> SpaceapiServer {
     SpaceapiServerBuilder::new(status)
-        .socket_addr((ip, port))
         .redis_connection_info("redis://127.0.0.1/")
         .build()
         .unwrap()
@@ -67,8 +66,8 @@ fn server_starts() {
     assert_eq!(connect_result.unwrap_err().kind(), ErrorKind::ConnectionRefused);
 
     // Instantiate and start server
-    let server = get_server(ip, port, status);
-    let mut listening = server.serve().unwrap();
+    let server = get_server(status);
+    let mut listening = server.serve((ip, port)).unwrap();
 
     // Connecting to server should work now
     let connect_result = TcpStream::connect((ip, port));
