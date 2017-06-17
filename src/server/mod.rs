@@ -9,7 +9,7 @@ use r2d2;
 use r2d2_redis::RedisConnectionManager;
 use iron::Iron;
 use router::Router;
-use redis::IntoConnectionInfo;
+use redis::{IntoConnectionInfo, ConnectionInfo};
 
 mod handlers;
 
@@ -19,6 +19,63 @@ use ::sensors;
 use ::modifiers;
 use ::errors::SpaceapiServerError;
 use ::types::RedisPool;
+
+pub struct SpaceapiServerBuilder {
+    status: api::Status,
+    socket_addr: Result<SocketAddr, SpaceapiServerError>,
+    redis_connection_info: Result<ConnectionInfo, SpaceapiServerError>,
+    sensor_specs: sensors::SafeSensorSpecs,
+    status_modifiers: Vec<Box<modifiers::StatusModifier>>,
+}
+
+impl SpaceapiServerBuilder {
+
+    pub fn new(status: api::Status) -> SpaceapiServerBuilder {
+        SpaceapiServerBuilder {
+            status: status,
+            socket_addr: Err("socket_addr missing".into()),
+            redis_connection_info: Err("redis_connection_info missing".into()),
+            sensor_specs: Arc::new(Mutex::new(vec![])),
+            status_modifiers: vec![],
+        }
+    }
+
+    pub fn socket_addr<S: ToSocketAddrs>(mut self, socket_addr: S) -> Self {
+        self.socket_addr = socket_addr.to_socket_addrs()
+            .map_err(|e| e.into())
+            .and_then(|mut i| i.next().ok_or("Invalid socket address".into()));
+        self
+    }
+
+    pub fn redis_connection_info<R: IntoConnectionInfo>(mut self, redis_connection_info: R) -> Self {
+        self.redis_connection_info = redis_connection_info.into_connection_info().map_err(|e| e.into());
+        self
+    }
+
+    pub fn add_status_modifier<M: modifiers::StatusModifier + 'static>(mut self, modifier: M) -> Self {
+        self.status_modifiers.push(Box::new(modifier));
+        self
+    }
+
+    /// Add a new sensor.
+    ///
+    /// The first argument is a ``api::SensorTemplate`` instance containing all static data.
+    /// The second argument specifies how to get the actual sensor value from Redis.
+    pub fn add_sensor(self, template: Box<api::SensorTemplate>, data_key: String) -> Self {
+        let sensor_specs_ref = self.sensor_specs.clone();
+        sensor_specs_ref.lock().unwrap().push(
+            sensors::SensorSpec { template: template, data_key: data_key}
+        );
+        self
+    }
+
+    pub fn build(self) -> Result<SpaceapiServer, SpaceapiServerError> {
+        SpaceapiServer::new(self.socket_addr?,
+                            self.status,
+                            self.redis_connection_info?,
+                            self.status_modifiers)
+    }
+}
 
 
 /// A Space API server instance.
