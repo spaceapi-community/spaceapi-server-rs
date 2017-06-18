@@ -30,6 +30,7 @@ pub mod sensors;
 pub mod modifiers;
 
 pub use server::SpaceapiServer;
+pub use server::SpaceapiServerBuilder;
 pub use errors::SpaceapiServerError;
 
 /// Return own crate version. Used in API responses.
