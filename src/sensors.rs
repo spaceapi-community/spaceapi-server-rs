@@ -1,6 +1,6 @@
 //! Sensor related stuff.
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use r2d2;
 use redis::Commands;
@@ -36,9 +36,8 @@ error_type! {
     }
 }
 
-/// A vector of sensor specs, wrapped in an Arc and a Mutex. Safe for use in multithreaded situations.
-/// TODO: Maybe we could use a RwLock instead of a Mutex?
-pub type SafeSensorSpecs = Arc<Mutex<Vec<SensorSpec>>>;
+/// A vector of sensor specs, wrapped in an Arc. Safe for use in multithreaded situations.
+pub type SafeSensorSpecs = Arc<Vec<SensorSpec>>;
 
 impl SensorSpec {
 

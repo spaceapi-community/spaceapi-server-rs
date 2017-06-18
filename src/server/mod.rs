@@ -1,7 +1,7 @@
 //! The SpaceAPI server struct.
 
 use std::net::ToSocketAddrs;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::Duration;
 
 use r2d2;
@@ -22,7 +22,7 @@ use ::types::RedisPool;
 pub struct SpaceapiServerBuilder {
     status: api::Status,
     redis_connection_info: Result<ConnectionInfo, SpaceapiServerError>,
-    sensor_specs: sensors::SafeSensorSpecs,
+    sensor_specs: Vec<sensors::SensorSpec>,
     status_modifiers: Vec<Box<modifiers::StatusModifier>>,
 }
 
@@ -32,7 +32,7 @@ impl SpaceapiServerBuilder {
         SpaceapiServerBuilder {
             status: status,
             redis_connection_info: Err("redis_connection_info missing".into()),
-            sensor_specs: Arc::new(Mutex::new(vec![])),
+            sensor_specs: vec![],
             status_modifiers: vec![],
         }
     }
@@ -51,9 +51,8 @@ impl SpaceapiServerBuilder {
     ///
     /// The first argument is a ``api::SensorTemplate`` instance containing all static data.
     /// The second argument specifies how to get the actual sensor value from Redis.
-    pub fn add_sensor(self, template: Box<api::SensorTemplate>, data_key: String) -> Self {
-        let sensor_specs_ref = self.sensor_specs.clone();
-        sensor_specs_ref.lock().unwrap().push(
+    pub fn add_sensor(mut self, template: Box<api::SensorTemplate>, data_key: String) -> Self {
+        self.sensor_specs.push(
             sensors::SensorSpec { template: template, data_key: data_key}
         );
         self
@@ -85,7 +84,7 @@ impl SpaceapiServerBuilder {
         Ok(SpaceapiServer {
             status: self.status,
             redis_pool: pool,
-            sensor_specs: self.sensor_specs,
+            sensor_specs: Arc::new(self.sensor_specs),
             status_modifiers: self.status_modifiers,
         })
     }

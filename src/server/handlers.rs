@@ -59,7 +59,7 @@ impl ReadHandler {
         let mut status_copy = self.status.clone();
 
         // Process registered sensors
-        for sensor_spec in self.sensor_specs.lock().unwrap().iter() {
+        for sensor_spec in self.sensor_specs.iter() {
 
             match sensor_spec.get_sensor_value(self.redis_pool.clone()) {
 
@@ -138,8 +138,7 @@ impl UpdateHandler {
     /// Update sensor value in Redis
     fn update_sensor(&self, sensor: &str, value: &str) -> Result<(), sensors::SensorError> {
         // Validate sensor
-        let sensor_specs = self.sensor_specs.lock().unwrap();
-        let sensor_spec = try!(sensor_specs.iter()
+        let sensor_spec = try!(self.sensor_specs.iter()
                                .find(|&spec| spec.data_key == sensor)
                                .ok_or(sensors::SensorError::UnknownSensor(sensor.into())));
 
