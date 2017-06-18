@@ -1,6 +1,7 @@
 /// Modifiers which can be injected by the application logic to change the state
 
-use std::collections::HashMap;
+use serde_json::Value;
+use serde_json::map::Map;
 
 use ::api;
 
@@ -36,21 +37,12 @@ pub struct LibraryVersions;
 
 impl StatusModifier for LibraryVersions {
     fn modify(&self, status: &mut api::Status) {
-        // Add library version information
-        let api_version = api::get_version().to_string();
-        let server_version = ::get_version().to_string();
+        // Instantiate versions object
+        let mut versions = Map::new();
+        versions.insert("spaceapi-rs".into(), api::get_version().into());
+        versions.insert("spaceapi-server-rs".into(), ::get_version().into());
 
-        // Create version map if it doesn't exist yet
-        if status.ext_versions.is_none() {
-            status.ext_versions = Some(HashMap::new());
-        }
-
-        // Add to map
-        // TODO: Simplify this stuff once spaceapi-rs moved to serde
-        // and doesn't need Optional anymore.
-        if let Some(ref mut map) = status.ext_versions {
-            map.insert("spaceapi-rs".to_string(), api_version);
-            map.insert("spaceapi-server-rs".to_string(), server_version);
-        }
+        // Add to extensions
+        status.extensions.insert("versions".into(), Value::Object(versions));
     }
 }

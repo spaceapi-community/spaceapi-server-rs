@@ -10,16 +10,15 @@ use spaceapi_server::api;
 
 /// Create a new status object containing test data.
 fn get_status() -> api::Status {
-    api::Status::new(
-        "ourspace",
-        "https://example.com/logo.png",
-        "https://example.com/",
-        api::Location {
+    api::StatusBuilder::new("ourspace")
+        .logo("https://example.com/logo.png")
+        .url("https://example.com/")
+        .location(api::Location {
             address: Some("Street 1, Zürich, Switzerland".into()),
             lat: 47.123,
             lon: 8.88,
-        },
-        api::Contact {
+        })
+        .contact(api::Contact {
             irc: None,
             twitter: None,
             foursquare: None,
@@ -33,12 +32,11 @@ fn get_status() -> api::Status {
             google: None,
             keymasters: None,
             sip: None,
-        },
-        vec![
-            "email".into(),
-            "twitter".into(),
-        ],
-    )
+        })
+        .add_issue_report_channel("email")
+        .add_issue_report_channel("twitter")
+        .build()
+        .unwrap()
 }
 
 
