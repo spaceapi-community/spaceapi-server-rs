@@ -51,9 +51,9 @@ impl SpaceapiServerBuilder {
     ///
     /// The first argument is a ``api::SensorTemplate`` instance containing all static data.
     /// The second argument specifies how to get the actual sensor value from Redis.
-    pub fn add_sensor(mut self, template: Box<api::SensorTemplate>, data_key: String) -> Self {
+    pub fn add_sensor<T: api::SensorTemplate + 'static>(mut self, template: T, data_key: String) -> Self {
         self.sensor_specs.push(
-            sensors::SensorSpec { template: template, data_key: data_key}
+            sensors::SensorSpec { template: Box::new(template), data_key: data_key}
         );
         self
     }

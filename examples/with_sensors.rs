@@ -32,12 +32,12 @@ fn main() {
     let server = SpaceapiServerBuilder::new(status)
         .redis_connection_info("redis://127.0.0.1/")
         .add_status_modifier(StateFromPeopleNowPresent)
-        .add_sensor(Box::new(PeopleNowPresentSensorTemplate {
+        .add_sensor(PeopleNowPresentSensorTemplate {
             location: Some("Hackerspace".into()),
             name: None,
             description: None,
             names: None,
-        }), "people_now_present".into())
+        }, "people_now_present".into())
         .build()
         .expect("Could not initialize server");
 
