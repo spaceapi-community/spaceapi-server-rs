@@ -136,16 +136,4 @@ impl SpaceapiServer {
         }
         Iron::new(router).http(socket_addr)
     }
-
-    /// Register a new sensor.
-    ///
-    /// The first argument is a ``api::SensorTemplate`` instance containing all static data.
-    /// The second argument specifies how to get the actual sensor value from Redis.
-    pub fn register_sensor(&mut self, template: Box<api::SensorTemplate>, data_key: String) {
-        let sensor_specs_ref = self.sensor_specs.clone();
-        sensor_specs_ref.lock().unwrap().push(
-            sensors::SensorSpec { template: template, data_key: data_key}
-        );
-    }
-
 }
