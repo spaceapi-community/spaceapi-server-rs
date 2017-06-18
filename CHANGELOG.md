@@ -12,9 +12,9 @@ Possible log types:
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
 
-### v0.X.X UNRELEASED
+### v0.4.0 UNRELEASED
 
-- ...
+- [changed] Add `SpaceApiServerBuilder` and remove `SpaceApiServer::new()`
 
 ### v0.3.1 (2016-09-02)
 
