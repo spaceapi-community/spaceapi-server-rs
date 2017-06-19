@@ -1,8 +1,5 @@
 /// Modifiers which can be injected by the application logic to change the state
 
-use serde_json::Value;
-use serde_json::map::Map;
-
 use ::api;
 
 /// `StatusModifier`s are used to modify the status
@@ -29,20 +26,5 @@ impl StatusModifier for StateFromPeopleNowPresent {
                 status.state.message = Some(format!("{} people here right now", count));
             }
         }
-    }
-}
-
-/// This modifier adds internal version information to the output.
-pub struct LibraryVersions;
-
-impl StatusModifier for LibraryVersions {
-    fn modify(&self, status: &mut api::Status) {
-        // Instantiate versions object
-        let mut versions = Map::new();
-        versions.insert("spaceapi-rs".into(), api::get_version().into());
-        versions.insert("spaceapi-server-rs".into(), ::get_version().into());
-
-        // Add to extensions
-        status.extensions.insert("versions".into(), Value::Object(versions));
     }
 }
