@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Router` struct in crate `router`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Router">
+
+    <title>router::Router - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Struct Router</p><div class="block items"><ul><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>router</a></p><script>window.sidebarCurrent = {name: 'Router', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>router</a>::<wbr><a class="struct" href=''>Router</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/router/router.rs.html#26-28' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Router { /* fields omitted */ }</pre><div class='docblock'><p><code>Router</code> provides an interface for creating complex routes as middleware
+for the Iron framework.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/router/router.rs.html#30-202' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Construct a new, empty <code>Router</code>.</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="ident">router</span> <span class="op">=</span> <span class="ident">Router</span>::<span class="ident">new</span>();</pre>
+</div><h4 id='method.route' class="method"><span id='route.v' class='invisible'><code>fn <a href='#method.route' class='fnname'>route</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;method: <a class="enum" href="../hyper/method/enum.Method.html" title="enum hyper::method::Method">Method</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Add a new route to a <code>Router</code>, matching both a method and glob pattern.</p>
+
+<p><code>route</code> supports glob patterns: <code>*</code> for a single wildcard segment and
+<code>:param</code> for matching storing that segment of the request url in the <code>Params</code>
+object, which is stored in the request <code>extensions</code>.</p>
+
+<p>For instance, to route <code>Get</code> requests on any route matching
+<code>/users/:userid/:friend</code> and store <code>userid</code> and <code>friend</code> in
+the exposed Params object:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">router</span> <span class="op">=</span> <span class="ident">Router</span>::<span class="ident">new</span>();
+<span class="ident">router</span>.<span class="ident">route</span>(<span class="ident">method</span>::<span class="ident">Get</span>, <span class="string">&quot;/users/:userid/:friendid&quot;</span>, <span class="ident">controller</span>, <span class="string">&quot;user_friend&quot;</span>);</pre>
+
+<p><code>route_id</code> is a unique name for your route, and is used when generating an URL with
+<code>url_for</code>.</p>
+
+<p>The controller provided to route can be any <code>Handler</code>, which allows
+extreme flexibility when handling routes. For instance, you could provide
+a <code>Chain</code>, a <code>Handler</code>, which contains an authorization middleware and
+a controller function, so that you can confirm that the request is
+authorized for this route before handling it.</p>
+</div><h4 id='method.get' class="method"><span id='get.v' class='invisible'><code>fn <a href='#method.get' class='fnname'>get</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Like route, but specialized to the <code>Get</code> method.</p>
+</div><h4 id='method.post' class="method"><span id='post.v' class='invisible'><code>fn <a href='#method.post' class='fnname'>post</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Like route, but specialized to the <code>Post</code> method.</p>
+</div><h4 id='method.put' class="method"><span id='put.v' class='invisible'><code>fn <a href='#method.put' class='fnname'>put</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Like route, but specialized to the <code>Put</code> method.</p>
+</div><h4 id='method.delete' class="method"><span id='delete.v' class='invisible'><code>fn <a href='#method.delete' class='fnname'>delete</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Like route, but specialized to the <code>Delete</code> method.</p>
+</div><h4 id='method.head' class="method"><span id='head.v' class='invisible'><code>fn <a href='#method.head' class='fnname'>head</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Like route, but specialized to the <code>Head</code> method.</p>
+</div><h4 id='method.patch' class="method"><span id='patch.v' class='invisible'><code>fn <a href='#method.patch' class='fnname'>patch</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Like route, but specialized to the <code>Patch</code> method.</p>
+</div><h4 id='method.options' class="method"><span id='options.v' class='invisible'><code>fn <a href='#method.options' class='fnname'>options</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Like route, but specialized to the <code>Options</code> method.</p>
+</div><h4 id='method.any' class="method"><span id='any.v' class='invisible'><code>fn <a href='#method.any' class='fnname'>any</a>&lt;S:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;, H:&nbsp;<a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a>, I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>&gt;&gt;(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;glob: S, <br>&nbsp;&nbsp;&nbsp;&nbsp;handler: H, <br>&nbsp;&nbsp;&nbsp;&nbsp;route_id: I<br>) -&gt; &amp;mut <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span></h4>
+<div class='docblock'><p>Route will match any method, including gibberish.
+In case of ambiguity, handlers specific to methods will be preferred.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../typemap/trait.Key.html" title="trait typemap::Key">Key</a> for <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/router/router.rs.html#204' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Value' class="type"><span id='Value.t' class='invisible'><code>type <a href='../typemap/trait.Key.html#associatedtype.Value' class="type">Value</a> = <a class="struct" href="../router/struct.Params.html" title="struct router::Params">Params</a></code></span></h4>
+<div class='docblock'><p>The value type associated with this key type.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../iron/middleware/trait.Handler.html" title="trait iron::middleware::Handler">Handler</a> for <a class="struct" href="../router/struct.Router.html" title="struct router::Router">Router</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/router/router.rs.html#208-226' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.handle' class="method"><span id='handle.v' class='invisible'><code>fn <a href='../iron/middleware/trait.Handler.html#tymethod.handle' class='fnname'>handle</a>(&amp;self, req: &amp;mut <a class="struct" href="../iron/request/struct.Request.html" title="struct iron::request::Request">Request</a>) -&gt; <a class="type" href="../iron/type.IronResult.html" title="type iron::IronResult">IronResult</a>&lt;<a class="struct" href="../iron/response/struct.Response.html" title="struct iron::response::Response">Response</a>&gt;</code></span></h4>
+<div class='docblock'><p>Produce a <code>Response</code> from a Request, with the possibility of error.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "router";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

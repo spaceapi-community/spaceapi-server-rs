@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["SensorError","A `SensorError` wraps problems that can occur when reading or updating sensor values."]],"struct":[["SensorSpec","A specification of a sensor."]],"trait":[["ErrorCause",""],["ErrorDescription",""],["ErrorDisplay",""]],"type":[["SafeSensorSpecs","A vector of sensor specs, wrapped in an Arc. Safe for use in multithreaded situations."]]});

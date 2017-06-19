@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PeopleNowPresentSensor",""],["PeopleNowPresentSensorTemplate",""],["Sensors",""],["TemperatureSensor",""],["TemperatureSensorTemplate",""]],"trait":[["SensorTemplate","A trait for all possible sensor templates."]]});

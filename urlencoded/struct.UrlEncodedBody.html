@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `UrlEncodedBody` struct in crate `urlencoded`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, UrlEncodedBody">
+
+    <title>urlencoded::UrlEncodedBody - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Struct UrlEncodedBody</p><div class="block items"><ul><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>urlencoded</a></p><script>window.sidebarCurrent = {name: 'UrlEncodedBody', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>urlencoded</a>::<wbr><a class="struct" href=''>UrlEncodedBody</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/urlencoded/lib.rs.html#28' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct UrlEncodedBody;</pre><div class='docblock'><p>Plugin for <code>Request</code> that extracts URL encoded data from the request body.</p>
+
+<p>Use it like this: <code>req.get_ref::&lt;UrlEncodedBody&gt;()</code></p>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class="trait" href="../typemap/trait.Key.html" title="trait typemap::Key">Key</a> for <a class="struct" href="../urlencoded/struct.UrlEncodedBody.html" title="struct urlencoded::UrlEncodedBody">UrlEncodedBody</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/urlencoded/lib.rs.html#74-76' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Value' class="type"><span id='Value.t' class='invisible'><code>type <a href='../typemap/trait.Key.html#associatedtype.Value' class="type">Value</a> = <a class="type" href="../urlencoded/type.QueryMap.html" title="type urlencoded::QueryMap">QueryMap</a></code></span></h4>
+<div class='docblock'><p>The value type associated with this key type.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;'a, 'b&gt; <a class="trait" href="../plugin/trait.Plugin.html" title="trait plugin::Plugin">Plugin</a>&lt;<a class="struct" href="../iron/request/struct.Request.html" title="struct iron::request::Request">Request</a>&lt;'a, 'b&gt;&gt; for <a class="struct" href="../urlencoded/struct.UrlEncodedBody.html" title="struct urlencoded::UrlEncodedBody">UrlEncodedBody</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/urlencoded/lib.rs.html#92-101' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Error' class="type"><span id='Error.t' class='invisible'><code>type <a href='../plugin/trait.Plugin.html#associatedtype.Error' class="type">Error</a> = <a class="enum" href="../urlencoded/enum.UrlDecodingError.html" title="enum urlencoded::UrlDecodingError">UrlDecodingError</a></code></span></h4>
+<div class='docblock'><p>The error type associated with this plugin.</p>
+</div><h4 id='method.eval' class="method"><span id='eval.v' class='invisible'><code>fn <a href='../plugin/trait.Plugin.html#tymethod.eval' class='fnname'>eval</a>(req: &amp;mut <a class="struct" href="../iron/request/struct.Request.html" title="struct iron::request::Request">Request</a>) -&gt; <a class="type" href="../urlencoded/type.QueryResult.html" title="type urlencoded::QueryResult">QueryResult</a></code></span></h4>
+<div class='docblock'><p>Create the plugin from an instance of the extended type. <a href="../plugin/trait.Plugin.html#tymethod.eval">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "urlencoded";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

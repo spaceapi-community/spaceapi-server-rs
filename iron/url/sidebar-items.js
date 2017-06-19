@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["define_encode_set","Define a new struct that implements the `EncodeSet` trait, for use in `percent_decode()` and related functions."]]});

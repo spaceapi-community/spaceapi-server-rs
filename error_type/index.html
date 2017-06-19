@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `error_type` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, error_type">
+
+    <title>error_type - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc mod">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Crate error_type</p><div class="block items"><ul><li><a href="#macros">Macros</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'error_type', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Crate <a class="mod" href=''>error_type</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/error_type/lib.rs.html#1-499' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>This crate provides the <code>error_type!</code> macro, which is designed to produce a fresh, reasonably well-featured error type from a concise definition.</p>
+
+<p>A simple example of the usage is given below:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">macro_use</span>]</span> <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">error_type</span>;
+
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>;
+
+<span class="macro">error_type</span><span class="macro">!</span> {
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">LibError</span> {
+        <span class="ident">Io</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Error</span>) {
+            <span class="ident">cause</span>;
+        },
+        <span class="ident">Kaboom</span>(<span class="ident">Kaboom</span>) {
+            <span class="ident">disp</span> (<span class="ident">e</span>, <span class="ident">fmt</span>) <span class="macro">write</span><span class="macro">!</span>(<span class="ident">fmt</span>, <span class="string">&quot;{:?}&quot;</span>, <span class="ident">e</span>);
+            <span class="ident">desc</span> (<span class="ident">_e</span>) <span class="string">&quot;kaboom!&quot;</span>;
+        },
+        <span class="ident">Message</span>(<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>) {
+            <span class="ident">desc</span> (<span class="ident">e</span>) <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">e</span>;
+            <span class="ident">from</span> (<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="ident">s</span>.<span class="ident">into</span>();
+            <span class="ident">from</span> (<span class="ident">s</span>: <span class="ident">String</span>) <span class="ident">s</span>.<span class="ident">into</span>();
+        },
+        <span class="ident">Other</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span>) {
+            <span class="ident">desc</span> (<span class="ident">e</span>) <span class="ident">e</span>.<span class="ident">description</span>();
+            <span class="ident">cause</span> (<span class="ident">e</span>) <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">e</span>);
+        }
+    }
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Kaboom</span>;</pre>
+
+<p>The expansion of the above includes the following:</p>
+
+<ul>
+<li><p>The <code>LibError</code> enumeration (plus the provided <code>#[derive(Debug)]</code> annotation), with <code>Io</code>, <code>Message</code> and <code>Other</code> variants.</p></li>
+<li><p>An implicit <code>impl From&lt;Payload&gt; for LibError</code> for each variant&#39;s payload type.</p></li>
+<li><p>An implicit <code>impl Display for LibError</code>, using the existing <code>Display</code> implementation for each variant&#39;s payload type.</p></li>
+<li><p>An implicit <code>impl Error for LibError</code>.</p></li>
+<li><p>For the <code>Io</code> variant:</p>
+
+<ul>
+<li><p>An implicit <code>description</code>, forwarded to the existing definition for <code>std::io::Error</code>.</p></li>
+<li><p>An automatic <code>cause</code>, forwarded to the existing definition for <code>std::io::Error</code>.</p></li>
+</ul>
+
+<p><strong>Note</strong>: the automatic <code>cause</code> returns the result of <code>std::io::Error::cause</code>, <em>not</em> the payload itself.  This macro considers the payload to <em>be</em> the error, not the underlying cause.</p></li>
+<li><p>For the <code>Kaboom</code> variant:</p>
+
+<ul>
+<li><p>An explicit <code>Display</code> override, since <code>Kaboom</code> does not, itself, implement it.</p></li>
+<li><p>An explicit <code>description</code>, which just returns a string literal.</p></li>
+</ul></li>
+<li><p>For the <code>Message</code> variant:</p>
+
+<ul>
+<li><p>An explicit <code>description</code>, which just returns the contents of the <code>Cow&lt;&#39;static, str&gt;</code>.</p></li>
+<li><p>An implicit <code>cause</code>, which just returns <code>None</code>.</p></li>
+<li><p>An explicit <code>From&lt;&amp;&#39;static str&gt;</code> conversion.</p></li>
+<li><p>An explicit <code>From&lt;String&gt;</code> conversion.</p></li>
+</ul></li>
+<li><p>For the <code>Other</code> variant:</p>
+
+<ul>
+<li><p>An explicit <code>description</code> which forwards to the existing definition for the boxed <code>Error</code>.</p></li>
+<li><p>An explicit <code>cause</code> which returns the boxed error <em>itself</em> as the cause.  This is distinct from the behaviour of an <em>automatic</em> <code>cause</code>.</p></li>
+</ul></li>
+</ul>
+
+<h2 id='faq' class='section-header'><a href='#faq'>FAQ</a></h2>
+<ul>
+<li><p><em>Can I use unitary variants; ones without a payload?</em></p>
+
+<p>No, not as yet.  Maybe if there&#39;s demand.</p></li>
+<li><p><em>Can I use tuple variants with more than one element?</em></p>
+
+<p>No.  This would likely be rather inconvenient to implement, due to the way the various parts of the implementation are constructed.  Not impossible, though.</p></li>
+<li><p><em>Can I use struct variants?</em></p>
+
+<p>No, for much the same reason as tuple variants.</p></li>
+<li><p><em>Can I have fields common to all variants; i.e. have the enum wrapped in a struct?</em></p>
+
+<p>No.  It would be nice, but I&#39;m not sure how to go about that.  You can always use the expansion of <code>error_type!</code> in a custom structure for the added information.</p></li>
+</ul>
+</div><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="macro" href="macro.error_type.html"
+                                  title='macro error_type::error_type'>error_type</a></td>
+                           <td class='docblock-short'>
+                                <p>Constructs a reasonably well-featured error type from a concise description.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "error_type";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["error_type","Constructs a reasonably well-featured error type from a concise description."]]});
