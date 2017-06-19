@@ -29,7 +29,6 @@ fn main() {
     // Set up server
     let server = SpaceapiServerBuilder::new(status)
         .redis_connection_info("redis://127.0.0.1/")
-        .add_status_modifier(modifiers::LibraryVersions)
         .build()
         .unwrap();
 

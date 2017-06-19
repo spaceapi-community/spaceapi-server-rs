@@ -10,6 +10,9 @@ use iron::Iron;
 use router::Router;
 use redis::{IntoConnectionInfo, ConnectionInfo};
 
+use serde_json::Value;
+use serde_json::map::Map;
+
 mod handlers;
 
 use ::api;
@@ -28,7 +31,15 @@ pub struct SpaceapiServerBuilder {
 
 impl SpaceapiServerBuilder {
 
-    pub fn new(status: api::Status) -> SpaceapiServerBuilder {
+    pub fn new(mut status: api::Status) -> SpaceapiServerBuilder {
+        // Instantiate versions object
+        let mut versions = Map::new();
+        versions.insert("spaceapi-rs".into(), api::get_version().into());
+        versions.insert("spaceapi-server-rs".into(), ::get_version().into());
+
+        // Add to extensions
+        status.extensions.insert("versions".into(), Value::Object(versions));
+
         SpaceapiServerBuilder {
             status: status,
             redis_connection_info: Err("redis_connection_info missing".into()),
