@@ -12,9 +12,12 @@ Possible log types:
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
 
-### v0.4.0 UNRELEASED
+### v0.4.0 (2017-06-19)
 
-- [changed] Add `SpaceApiServerBuilder` and remove `SpaceApiServer::new()`
+- [changed] Update spaceapi (0.5) and thus use serde for serialization (#58, #66)
+- [changed] Update iron dependency to 0.5 (#62)
+- [changed] Add `SpaceApiServerBuilder` and remove `SpaceApiServer::new()` (#68)
+- [changed] Add version info statically and remove `modifiers::LibraryVersions` (#70)
 
 ### v0.3.1 (2016-09-02)
 
