@@ -19,6 +19,7 @@ before_script:
 matrix:
   allow_failures:
     - rust: nightly
+  fast_finish: true
 services:
   - redis-server
 script:
