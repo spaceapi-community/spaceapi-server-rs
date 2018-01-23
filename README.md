@@ -13,6 +13,10 @@ This is a library that allows an easy implementation of a
 - Crate Documentation: https://coredump-ch.github.io/spaceapi-server-rs/
 - Space API Reference: http://spaceapi.net/documentation
 
+## Requirements
+
+ * Rust 1.17.0 or newer
+
 
 ## Usage
 
