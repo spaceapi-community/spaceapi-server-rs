@@ -12,6 +12,11 @@ Possible log types:
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
 
+### v0.4.1 (2018-06-28)
+
+- [changed] Bump minimal required Rust version (#76, #78)
+- [changed] Fixed various links in metadata (#75, #79)
+
 ### v0.4.0 (2017-06-19)
 
 - [changed] Update spaceapi (0.5) and thus use serde for serialization (#58, #66)
