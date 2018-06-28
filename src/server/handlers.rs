@@ -93,7 +93,7 @@ impl ReadHandler {
         // Serialize to JSON
         serde_json::to_string(&status_copy)
             .expect("Status object could not be serialized to JSON. \
-                     Please open an issue at https://github.com/coredump-ch/spaceapi-server-rs/issues")
+                     Please open an issue at https://github.com/spaceapi-community/spaceapi-server-rs/issues")
     }
 }
 

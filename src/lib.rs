@@ -3,7 +3,7 @@
 //! Running this code starts a HTTP server instance. The default port is 3000, but you can set your
 //! own favorite port by exporting the `PORT` environment variable.
 
-#![doc(html_root_url = "https://coredump-ch.github.io/spaceapi-server-rs/")]
+#![doc(html_root_url = "https://docs.rs/spaceapi-server")]
 
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]

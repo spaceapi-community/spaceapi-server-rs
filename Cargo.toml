@@ -1,8 +1,8 @@
 [package]
 name = "spaceapi-server"
 version = "0.4.0"
-documentation = "https://coredump-ch.github.io/spaceapi-server-rs/"
-repository = "https://github.com/coredump-ch/spaceapi-server-rs"
+documentation = "https://docs.rs/spaceapi-server"
+repository = "https://github.com/spaceapi-community/spaceapi-server-rs"
 license = "MIT OR Apache-2.0"
 authors = [
     "Raphael Nestler <raphael.nestler@gmail.com>",
@@ -23,7 +23,7 @@ include = [
 ]
 
 [badges]
-travis-ci = { repository = "coredump-ch/spaceapi-server-rs" }
+travis-ci = { repository = "spaceapi-community/spaceapi-server-rs" }
 
 [dependencies]
 r2d2 = "^0.7"
