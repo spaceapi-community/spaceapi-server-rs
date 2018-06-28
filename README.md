@@ -15,7 +15,7 @@ This is a library that allows an easy implementation of a
 
 ## Requirements
 
- * Rust 1.17.0 or newer
+ * Rust 1.21.0 or newer
 
 
 ## Usage
