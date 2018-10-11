@@ -46,10 +46,10 @@ impl ReadHandler {
                status_modifiers: Vec<Box<modifiers::StatusModifier>>)
                -> ReadHandler {
         ReadHandler {
-            status: status,
-            redis_pool: redis_pool,
-            sensor_specs: sensor_specs,
-            status_modifiers: status_modifiers,
+            status,
+            redis_pool,
+            sensor_specs,
+            status_modifiers,
         }
     }
 
@@ -86,7 +86,7 @@ impl ReadHandler {
             }
         }
 
-        for status_modifier in self.status_modifiers.iter() {
+        for status_modifier in &self.status_modifiers {
             status_modifier.modify(&mut status_copy);
         }
 
@@ -130,8 +130,8 @@ impl UpdateHandler {
     pub fn new(redis_pool: RedisPool, sensor_specs: sensors::SafeSensorSpecs)
                -> UpdateHandler {
         UpdateHandler {
-            redis_pool: redis_pool,
-            sensor_specs: sensor_specs,
+            redis_pool,
+            sensor_specs,
         }
     }
 
@@ -140,7 +140,7 @@ impl UpdateHandler {
         // Validate sensor
         let sensor_spec = try!(self.sensor_specs.iter()
                                .find(|&spec| spec.data_key == sensor)
-                               .ok_or(sensors::SensorError::UnknownSensor(sensor.into())));
+                               .ok_or_else(|| sensors::SensorError::UnknownSensor(sensor.into())));
 
         // Store data
         sensor_spec.set_sensor_value(self.redis_pool.clone(), value)
@@ -148,7 +148,7 @@ impl UpdateHandler {
 
     /// Build an OK response with the `HTTP 204 No Content` status code.
     fn ok_response(&self) -> Response {
-        Response::with((status::NoContent))
+        Response::with(status::NoContent)
             // Set headers
             .set(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())))
             .set(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])))
