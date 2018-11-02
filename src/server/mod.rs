@@ -89,8 +89,8 @@ impl SpaceapiServerBuilder {
             // logging the corresponding results anyways.
             .error_handler(Box::new(r2d2::NopErrorHandler))
             .build();
-        let redis_manager = try!(RedisConnectionManager::new(self.redis_connection_info?));
-        let pool = try!(r2d2::Pool::new(redis_config, redis_manager));
+        let redis_manager = RedisConnectionManager::new(self.redis_connection_info?)?;
+        let pool = r2d2::Pool::new(redis_config, redis_manager)?;
 
         Ok(SpaceapiServer {
             status: self.status,
