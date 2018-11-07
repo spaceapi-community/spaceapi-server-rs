@@ -6,8 +6,8 @@ use r2d2;
 use redis::Commands;
 use redis::RedisError;
 
-use ::api;
-use ::types::RedisPool;
+use crate::api;
+use crate::types::RedisPool;
 
 /// A specification of a sensor.
 ///

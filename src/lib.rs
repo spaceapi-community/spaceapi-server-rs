@@ -29,9 +29,9 @@ mod types;
 pub mod sensors;
 pub mod modifiers;
 
-pub use server::SpaceapiServer;
-pub use server::SpaceapiServerBuilder;
-pub use errors::SpaceapiServerError;
+pub use crate::server::SpaceapiServer;
+pub use crate::server::SpaceapiServerBuilder;
+pub use crate::errors::SpaceapiServerError;
 
 /// Return own crate version. Used in API responses.
 pub fn get_version() -> &'static str {

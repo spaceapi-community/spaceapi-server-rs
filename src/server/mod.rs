@@ -15,12 +15,12 @@ use serde_json::map::Map;
 
 mod handlers;
 
-use ::api;
+use crate::api;
 
-use ::sensors;
-use ::modifiers;
-use ::errors::SpaceapiServerError;
-use ::types::RedisPool;
+use crate::sensors;
+use crate::modifiers;
+use crate::errors::SpaceapiServerError;
+use crate::types::RedisPool;
 
 pub struct SpaceapiServerBuilder {
     status: api::Status,
@@ -35,7 +35,7 @@ impl SpaceapiServerBuilder {
         // Instantiate versions object
         let mut versions = Map::new();
         versions.insert("spaceapi-rs".into(), api::get_version().into());
-        versions.insert("spaceapi-server-rs".into(), ::get_version().into());
+        versions.insert("spaceapi-server-rs".into(), crate::get_version().into());
 
         // Add to extensions
         status.extensions.insert("versions".into(), Value::Object(versions));
@@ -137,7 +137,7 @@ impl SpaceapiServer {
     /// The call returns an `HttpResult<Listening>` object, see
     /// http://ironframework.io/doc/hyper/server/struct.Listening.html
     /// for more information.
-    pub fn serve<S: ToSocketAddrs>(self, socket_addr: S) -> ::HttpResult<::Listening> {
+    pub fn serve<S: ToSocketAddrs>(self, socket_addr: S) -> crate::HttpResult<crate::Listening> {
         // Launch server process
         let router = self.route();
         println!("Starting HTTP server on:");

@@ -11,10 +11,10 @@ use router::Router;
 
 use urlencoded;
 
-use ::api;
-use ::types::RedisPool;
-use ::sensors;
-use ::modifiers;
+use crate::api;
+use crate::types::RedisPool;
+use crate::sensors;
+use crate::modifiers;
 
 
 #[derive(Debug)]
