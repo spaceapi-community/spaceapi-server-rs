@@ -11,7 +11,8 @@ This is a library that allows an easy implementation of a
 [SpaceAPI](https://spaceapi.io/) v0.13 server in Rust.
 
 - Crate Documentation: https://docs.rs/spaceapi-server/
-- Space API Reference: https://spacedirectory.org/pages/docs.html
+- Space API Reference: https://spaceapi.io/pages/docs.html
+
 
 ## Requirements
 
