@@ -7,7 +7,7 @@
 
 #[macro_use] extern crate log;
 #[macro_use] extern crate error_type;
-extern crate rustc_serialize;
+extern crate serde;
 extern crate serde_json;
 extern crate iron;
 extern crate router;

@@ -1,8 +1,6 @@
 //! Handlers for the server.
 
-use std::collections::BTreeMap;
-
-use rustc_serialize::json::{Json, ToJson};
+use serde::ser::{Serialize, Serializer, SerializeMap};
 use serde_json;
 use iron::prelude::*;
 use iron::{status, headers, middleware};
@@ -22,13 +20,15 @@ struct ErrorResponse {
     reason: String,
 }
 
-impl ToJson for ErrorResponse {
-    /// Serialize an ErrorResponse object into a proper JSON structure.
-    fn to_json(&self) -> Json {
-        let mut d = BTreeMap::new();
-        d.insert("status".into(), "error".to_json());
-        d.insert("reason".into(), self.reason.to_json());
-        Json::Object(d)
+impl Serialize for ErrorResponse {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer
+    {
+        let mut map = serializer.serialize_map(Some(2))?;
+        map.serialize_entry("status", "error")?;
+        map.serialize_entry("reason", &self.reason)?;
+        map.end()
     }
 }
 
@@ -158,7 +158,8 @@ impl UpdateHandler {
     /// Build an error response with the specified `error_code` and the specified `reason` text.
     fn err_response(&self, error_code: status::Status, reason: &str) -> Response {
         let error = ErrorResponse { reason: reason.into() };
-        Response::with((error_code, error.to_json().to_string()))
+        let error_string = serde_json::to_string(&error).expect("Could not serialize error");
+        Response::with((error_code, error_string))
             // Set headers
             .set(Header(headers::ContentType("application/json; charset=utf-8".parse().unwrap())))
             .set(Header(headers::CacheControl(vec![headers::CacheDirective::NoCache])))
@@ -212,4 +213,16 @@ impl middleware::Handler for UpdateHandler {
         Ok(self.ok_response())
     }
 
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_serialize_error_response() {
+        let error = ErrorResponse { reason: "foobared".into() };
+        let json = serde_json::to_string(&error).unwrap();
+        assert_eq!(json, r#"{"status":"error","reason":"foobared"}"#);
+    }
 }
