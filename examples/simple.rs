@@ -1,5 +1,3 @@
-extern crate spaceapi_server;
-
 use spaceapi_server::SpaceapiServerBuilder;
 use spaceapi_server::api;
 

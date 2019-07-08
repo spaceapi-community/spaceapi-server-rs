@@ -21,6 +21,7 @@ include = [
     "LICENSE-MIT",
     "LICENSE-APACHE",
 ]
+edition = "2018"
 
 [dependencies]
 r2d2 = "^0.7"

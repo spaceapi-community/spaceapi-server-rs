@@ -36,14 +36,14 @@ pub struct ReadHandler {
     status: api::Status,
     redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
-    status_modifiers: Vec<Box<modifiers::StatusModifier>>,
+    status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
 }
 
 impl ReadHandler {
     pub fn new(status: api::Status,
                redis_pool: RedisPool,
                sensor_specs: sensors::SafeSensorSpecs,
-               status_modifiers: Vec<Box<modifiers::StatusModifier>>)
+               status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>)
                -> ReadHandler {
         ReadHandler {
             status,

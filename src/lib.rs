@@ -6,16 +6,8 @@
 #![doc(html_root_url = "https://docs.rs/spaceapi-server")]
 
 #[macro_use] extern crate log;
-#[macro_use] extern crate quick_error;
-extern crate serde;
-extern crate serde_json;
-extern crate iron;
-extern crate router;
-extern crate urlencoded;
-extern crate r2d2;
-extern crate r2d2_redis;
-extern crate redis;
-pub extern crate spaceapi as api;
+
+pub use spaceapi as api;
 
 pub use iron::error::HttpResult;
 pub use iron::Listening;

@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 
+use quick_error::quick_error;
 use r2d2;
 use redis::Commands;
 use redis::RedisError;
@@ -14,7 +15,7 @@ use crate::types::RedisPool;
 /// The ``template`` field contains the static data of a sensor and
 /// the ``data_key`` says how to find the sensor value in Redis.
 pub struct SensorSpec {
-    pub template: Box<api::SensorTemplate>,
+    pub template: Box<dyn api::SensorTemplate>,
     pub data_key: String,
 }
 
