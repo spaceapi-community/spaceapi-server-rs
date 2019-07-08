@@ -1,7 +1,6 @@
 # Rust Space API Implementation
 
-[![Build Status](https://img.shields.io/travis/spaceapi-community/spaceapi-server-rs/master.svg)](https://travis-ci.org/spaceapi-community/spaceapi-server-rs)
-[![Test Coverage](https://img.shields.io/coveralls/spaceapi-community/spaceapi-server-rs/master.svg)](https://coveralls.io/github/spaceapi-community/spaceapi-server-rs)
+[![CircleCI](https://circleci.com/gh/spaceapi-community/spaceapi-server-rs/tree/master.svg?style=shield)](https://circleci.com/gh/spaceapi-community/spaceapi-server-rs/tree/master)
 [![Crates.io Version](https://img.shields.io/crates/v/spaceapi-server.svg)](https://crates.io/crates/spaceapi-server)
 [![Crates.io Downloads](https://img.shields.io/crates/d/spaceapi-server.svg)](https://crates.io/crates/spaceapi-server)
 [![Dependency Status](https://dependencyci.com/github/spaceapi-community/spaceapi-server-rs/badge)](https://dependencyci.com/github/spaceapi-community/spaceapi-server-rs)
