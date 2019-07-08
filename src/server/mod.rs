@@ -25,6 +25,7 @@ use crate::types::RedisPool;
 pub struct SpaceapiServerBuilder {
     status: api::Status,
     redis_connection_info: Result<ConnectionInfo, SpaceapiServerError>,
+    pool: Option<r2d2::Pool<r2d2_redis::RedisConnectionManager>>,
     sensor_specs: Vec<sensors::SensorSpec>,
     status_modifiers: Vec<Box<modifiers::StatusModifier>>,
 }
@@ -43,6 +44,7 @@ impl SpaceapiServerBuilder {
         SpaceapiServerBuilder {
             status,
             redis_connection_info: Err("redis_connection_info missing".into()),
+            pool: None,
             sensor_specs: vec![],
             status_modifiers: vec![],
         }
@@ -50,6 +52,11 @@ impl SpaceapiServerBuilder {
 
     pub fn redis_connection_info<R: IntoConnectionInfo>(mut self, redis_connection_info: R) -> Self {
         self.redis_connection_info = redis_connection_info.into_connection_info().map_err(|e| e.into());
+        self
+    }
+
+    pub fn redis_pool(mut self, redis_pool: r2d2::Pool<r2d2_redis::RedisConnectionManager>) -> Self {
+        self.pool = Ok(redis_pool);
         self
     }
 
@@ -73,24 +80,29 @@ impl SpaceapiServerBuilder {
         // Log some useful debug information
         debug!("Redis connection info: {:?}", &self.redis_connection_info);
 
-        // Create redis pool
-        let redis_config = r2d2::Config::builder()
-            // Provide up to 6 connections in connection pool
-            .pool_size(6)
-            // At least 1 connection must be active
-            .min_idle(Some(2))
-            // Initialize connection pool lazily. This allows the SpaceAPI
-            // server to work even without a database connection.
-            .initialization_fail_fast(false)
-            // Try to get a connection for max 1 second
-            .connection_timeout(Duration::from_secs(1))
-            // Don't log errors directly.
-            // They can get quite verbose, and we're already catching and
-            // logging the corresponding results anyways.
-            .error_handler(Box::new(r2d2::NopErrorHandler))
-            .build();
-        let redis_manager = RedisConnectionManager::new(self.redis_connection_info?)?;
-        let pool = r2d2::Pool::new(redis_config, redis_manager)?;
+        let pool = match self.pool {
+            Some(p) => p,
+            None => {
+                // Create redis pool
+                let redis_config = r2d2::Config::builder()
+                    // Provide up to 6 connections in connection pool
+                    .pool_size(6)
+                    // At least 1 connection must be active
+                    .min_idle(Some(2))
+                    // Initialize connection pool lazily. This allows the SpaceAPI
+                    // server to work even without a database connection.
+                    .initialization_fail_fast(false)
+                    // Try to get a connection for max 1 second
+                    .connection_timeout(Duration::from_secs(1))
+                    // Don't log errors directly.
+                    // They can get quite verbose, and we're already catching and
+                    // logging the corresponding results anyways.
+                    .error_handler(Box::new(r2d2::NopErrorHandler))
+                    .build();
+                let redis_manager = RedisConnectionManager::new(self.redis_connection_info?)?;
+                r2d2::Pool::new(redis_config, redis_manager)?
+            },
+        };
 
         Ok(SpaceapiServer {
             status: self.status,
