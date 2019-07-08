@@ -6,7 +6,7 @@
 #![doc(html_root_url = "https://docs.rs/spaceapi-server")]
 
 #[macro_use] extern crate log;
-#[macro_use] extern crate error_type;
+#[macro_use] extern crate quick_error;
 extern crate serde;
 extern crate serde_json;
 extern crate iron;

@@ -1,7 +1,4 @@
 //! Custom error types.
-//!
-//! Unfortunately we can only define one error type using the ``error_type!`` macro in here, see
-//! https://github.com/DanielKeep/rust-error-type/issues/2.
 
 use redis::RedisError;
 use r2d2::InitializationError;
@@ -10,22 +7,25 @@ use std::borrow::Cow;
 
 
 /// A ``SpaceapiServerError`` wraps general problems that can occur in the SpaceAPI server.
-error_type! {
+quick_error! {
     #[derive(Debug)]
     pub enum SpaceapiServerError {
-        Redis(RedisError) {
-            cause;
-        },
-        R2d2(InitializationError) {
-            cause;
-        },
-        IoError(io::Error) {
-            cause;
-        },
-        Message(Cow<'static, str>) {
-            desc (e) &**e;
-            from (s: &'static str) s.into();
-            from (s: String) s.into();
-        },
+        Redis(err: RedisError) {
+            from()
+            cause(err)
+        }
+        R2d2(err: InitializationError) {
+            from()
+            cause(err)
+        }
+        IoError(err: io::Error) {
+            from()
+            cause(err)
+        }
+        Message(err: Cow<'static, str>) {
+            description(&**err)
+            from(s: &'static str) -> (s.into())
+            from(s: String) -> (s.into())
+        }
     }
 }
