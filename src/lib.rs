@@ -5,9 +5,6 @@
 
 #![doc(html_root_url = "https://docs.rs/spaceapi-server")]
 
-#![cfg_attr(feature="clippy", feature(plugin))]
-#![cfg_attr(feature="clippy", plugin(clippy))]
-
 #[macro_use] extern crate log;
 #[macro_use] extern crate error_type;
 extern crate rustc_serialize;

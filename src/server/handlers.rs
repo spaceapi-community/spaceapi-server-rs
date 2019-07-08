@@ -61,7 +61,7 @@ impl ReadHandler {
         // Process registered sensors
         for sensor_spec in self.sensor_specs.iter() {
 
-            match sensor_spec.get_sensor_value(self.redis_pool.clone()) {
+            match sensor_spec.get_sensor_value(&self.redis_pool) {
 
                 // Value could be read successfullly
                 Ok(value) => {
@@ -143,7 +143,7 @@ impl UpdateHandler {
             .ok_or_else(|| sensors::SensorError::UnknownSensor(sensor.into()))?;
 
         // Store data
-        sensor_spec.set_sensor_value(self.redis_pool.clone(), value)
+        sensor_spec.set_sensor_value(&self.redis_pool, value)
     }
 
     /// Build an OK response with the `HTTP 204 No Content` status code.

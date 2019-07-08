@@ -41,7 +41,7 @@ impl SpaceapiServerBuilder {
         status.extensions.insert("versions".into(), Value::Object(versions));
 
         SpaceapiServerBuilder {
-            status: status,
+            status,
             redis_connection_info: Err("redis_connection_info missing".into()),
             sensor_specs: vec![],
             status_modifiers: vec![],
@@ -64,7 +64,7 @@ impl SpaceapiServerBuilder {
     /// The second argument specifies how to get the actual sensor value from Redis.
     pub fn add_sensor<T: api::SensorTemplate + 'static>(mut self, template: T, data_key: String) -> Self {
         self.sensor_specs.push(
-            sensors::SensorSpec { template: Box::new(template), data_key: data_key}
+            sensors::SensorSpec { template: Box::new(template), data_key }
         );
         self
     }
