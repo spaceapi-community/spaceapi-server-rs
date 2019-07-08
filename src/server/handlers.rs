@@ -11,10 +11,10 @@ use router::Router;
 
 use urlencoded;
 
-use ::api;
-use ::types::RedisPool;
-use ::sensors;
-use ::modifiers;
+use crate::api;
+use crate::types::RedisPool;
+use crate::sensors;
+use crate::modifiers;
 
 
 #[derive(Debug)]
@@ -138,9 +138,9 @@ impl UpdateHandler {
     /// Update sensor value in Redis
     fn update_sensor(&self, sensor: &str, value: &str) -> Result<(), sensors::SensorError> {
         // Validate sensor
-        let sensor_spec = try!(self.sensor_specs.iter()
-                               .find(|&spec| spec.data_key == sensor)
-                               .ok_or_else(|| sensors::SensorError::UnknownSensor(sensor.into())));
+        let sensor_spec = self.sensor_specs.iter()
+            .find(|&spec| spec.data_key == sensor)
+            .ok_or_else(|| sensors::SensorError::UnknownSensor(sensor.into()))?;
 
         // Store data
         sensor_spec.set_sensor_value(self.redis_pool.clone(), value)

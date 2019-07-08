@@ -1,6 +1,6 @@
 /// Modifiers which can be injected by the application logic to change the state
 
-use ::api;
+use crate::api;
 
 /// `StatusModifier`s are used to modify the status
 pub trait StatusModifier: Send + Sync {

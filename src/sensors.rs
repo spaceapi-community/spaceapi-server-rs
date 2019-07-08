@@ -6,8 +6,8 @@ use r2d2;
 use redis::Commands;
 use redis::RedisError;
 
-use ::api;
-use ::types::RedisPool;
+use crate::api;
+use crate::types::RedisPool;
 
 /// A specification of a sensor.
 ///
@@ -43,15 +43,15 @@ impl SensorSpec {
 
     /// Retrieve sensor value from Redis.
     pub fn get_sensor_value(&self, redis_pool: RedisPool) -> Result<String, SensorError> {
-        let conn = try!(redis_pool.get());
-        let value: String = try!(conn.get(&*self.data_key));
+        let conn = redis_pool.get()?;
+        let value: String = conn.get(&*self.data_key)?;
         Ok(value)
     }
 
     /// Set sensor value in Redis.
     pub fn set_sensor_value(&self, redis_pool: RedisPool, value: &str) -> Result<(), SensorError> {
-        let conn = try!(redis_pool.get());
-        let _: String = try!(conn.set(&*self.data_key, value));
+        let conn = redis_pool.get()?;
+        let _: String = conn.set(&*self.data_key, value)?;
         Ok(())
     }
 
