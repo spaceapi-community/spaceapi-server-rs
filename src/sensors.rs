@@ -18,20 +18,22 @@ pub struct SensorSpec {
     pub data_key: String,
 }
 
-error_type! {
+quick_error! {
     /// A ``SensorError`` wraps problems that can occur when reading or updating sensor values.
     ///
     /// This type is only used for internal purposes and should not be used by third party code.
     #[derive(Debug)]
     pub enum SensorError {
-        UnknownSensor(String) {
-            desc (sensor) &sensor;
-        },
-        Redis(RedisError) {
-            cause;
-        },
-        R2d2(r2d2::GetTimeout) {
-            cause;
+        UnknownSensor(err: String) {
+            description(err)
+        }
+        Redis(err: RedisError) {
+            from()
+            cause(err)
+        }
+        R2d2(err: r2d2::GetTimeout) {
+            from()
+            cause(err)
         }
     }
 }
