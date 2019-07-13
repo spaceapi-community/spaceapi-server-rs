@@ -1,13 +1,12 @@
 //! Custom error types.
 
-use redis::RedisError;
 use r2d2::InitializationError;
-use std::io;
+use redis::RedisError;
 use std::borrow::Cow;
+use std::io;
 
-
-/// A ``SpaceapiServerError`` wraps general problems that can occur in the SpaceAPI server.
 quick_error! {
+    /// A ``SpaceapiServerError`` wraps general problems that can occur in the SpaceAPI server.
     #[derive(Debug)]
     pub enum SpaceapiServerError {
         Redis(err: RedisError) {
