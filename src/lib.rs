@@ -5,8 +5,6 @@
 
 #![doc(html_root_url = "https://docs.rs/spaceapi-server")]
 
-#[macro_use] extern crate log;
-
 pub use spaceapi as api;
 
 pub use iron::error::HttpResult;

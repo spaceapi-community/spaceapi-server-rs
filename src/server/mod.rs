@@ -7,6 +7,7 @@ use std::time::Duration;
 use r2d2;
 use r2d2_redis::RedisConnectionManager;
 use iron::Iron;
+use log::debug;
 use router::Router;
 use redis::{IntoConnectionInfo, ConnectionInfo};
 

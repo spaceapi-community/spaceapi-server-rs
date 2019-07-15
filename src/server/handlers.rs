@@ -5,6 +5,7 @@ use serde_json;
 use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
+use log::{debug, info, warn, error};
 use router::Router;
 
 use urlencoded;
