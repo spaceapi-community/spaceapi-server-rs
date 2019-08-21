@@ -5,6 +5,7 @@ use serde_json;
 use iron::prelude::*;
 use iron::{status, headers, middleware};
 use iron::modifiers::Header;
+use log::{debug, info, warn, error};
 use router::Router;
 
 use urlencoded;
@@ -36,14 +37,14 @@ pub struct ReadHandler {
     status: api::Status,
     redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
-    status_modifiers: Vec<Box<modifiers::StatusModifier>>,
+    status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
 }
 
 impl ReadHandler {
     pub fn new(status: api::Status,
                redis_pool: RedisPool,
                sensor_specs: sensors::SafeSensorSpecs,
-               status_modifiers: Vec<Box<modifiers::StatusModifier>>)
+               status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>)
                -> ReadHandler {
         ReadHandler {
             status,

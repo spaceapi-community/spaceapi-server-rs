@@ -21,12 +21,13 @@ include = [
     "LICENSE-MIT",
     "LICENSE-APACHE",
 ]
+edition = "2018"
 
 [dependencies]
 r2d2 = "^0.7"
 r2d2_redis = "^0.6"
 redis = "^0.8"
-log = "^0.3"
+log = "^0.4.4"
 iron = "^0.5"
 urlencoded = "^0.5"
 router = "^0.5"

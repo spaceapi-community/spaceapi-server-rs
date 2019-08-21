@@ -7,6 +7,7 @@ use std::time::Duration;
 use r2d2;
 use r2d2_redis::RedisConnectionManager;
 use iron::Iron;
+use log::debug;
 use router::Router;
 use redis::{IntoConnectionInfo, ConnectionInfo};
 
@@ -33,7 +34,7 @@ pub struct SpaceapiServerBuilder {
     status: api::Status,
     redis_info: RedisInfo,
     sensor_specs: Vec<sensors::SensorSpec>,
-    status_modifiers: Vec<Box<modifiers::StatusModifier>>,
+    status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
 }
 
 impl SpaceapiServerBuilder {
@@ -137,7 +138,7 @@ pub struct SpaceapiServer {
     status: api::Status,
     redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
-    status_modifiers: Vec<Box<modifiers::StatusModifier>>,
+    status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
 }
 
 impl SpaceapiServer {

@@ -1,5 +1,4 @@
-extern crate spaceapi_server;
-extern crate env_logger;
+use env_logger;
 
 use spaceapi_server::SpaceapiServerBuilder;
 use spaceapi_server::api;
