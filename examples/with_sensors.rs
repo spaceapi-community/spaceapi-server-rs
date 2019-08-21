@@ -1,6 +1,6 @@
 use env_logger;
 use spaceapi_server::api;
-use spaceapi_server::api::sensors::PeopleNowPresentSensorTemplate;
+use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
 use spaceapi_server::modifiers::StateFromPeopleNowPresent;
 use spaceapi_server::SpaceapiServerBuilder;
 
@@ -38,6 +38,24 @@ fn main() {
                 names: None,
             },
             "people_now_present".into(),
+        )
+        .add_sensor(
+            TemperatureSensorTemplate {
+                unit: "°C".into(),
+                location: "Room 1".into(),
+                name: None,
+                description: None,
+            },
+            "temp_room1".into(),
+        )
+        .add_sensor(
+            TemperatureSensorTemplate {
+                unit: "°C".into(),
+                location: "Room 2".into(),
+                name: None,
+                description: None,
+            },
+            "temp_room2".into(),
         )
         .build()
         .expect("Could not initialize server");
