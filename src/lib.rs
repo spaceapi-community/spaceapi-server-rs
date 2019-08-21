@@ -21,7 +21,7 @@
 //!
 //! Create a new Rust project:
 //!
-//! ```
+//! ```text
 //! cargo new --bin mystatus
 //! ```
 //!
@@ -34,8 +34,8 @@
 //!
 //! Create a `main.rs`:
 //!
-//! ```rust
-//! use spaceapi_server::api::{Contact, Location, StatusBuilder};
+//! ```no_run
+//! use spaceapi_server::api::{Contact, Location, StatusBuilder, IssueReportChannel};
 //! use spaceapi_server::SpaceapiServerBuilder;
 //!
 //! fn main() {
@@ -53,8 +53,8 @@
 //!             twitter: Some("@coredump_ch".into()),
 //!             ..Default::default()
 //!         })
-//!         .add_issue_report_channel("email")
-//!         .add_issue_report_channel("twitter")
+//!         .add_issue_report_channel(IssueReportChannel::Email)
+//!         .add_issue_report_channel(IssueReportChannel::Twitter)
 //!         .build()
 //!         .expect("Creating status failed");
 //!
@@ -87,8 +87,27 @@
 //! sensor template:
 //!
 //! ```rust
-//! use spaceapi::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
+//! use spaceapi_server::SpaceapiServerBuilder;
+//! use spaceapi_server::api::IssueReportChannel;
+//! use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
 //!
+//! # use spaceapi_server::api;
+//! # let status = api::StatusBuilder::new("aa")
+//! #     .logo("https://example.com/logo.png")
+//! #     .url("https://example.com/")
+//! #     .location(api::Location {
+//! #         address: Some("addr".into()),
+//! #         lat: 47.0,
+//! #         lon: 8.0,
+//! #     })
+//! #     .contact(api::Contact {
+//! #         twitter: Some("@example".into()),
+//! #         ..Default::default()
+//! #     })
+//! #     .add_issue_report_channel(IssueReportChannel::Twitter)
+//! #     .build()
+//! #     .expect("Creating status failed");
+//! #
 //! let server = SpaceapiServerBuilder::new(status)
 //!     .redis_connection_info("redis://127.0.0.1/")
 //!     .add_sensor(PeopleNowPresentSensorTemplate {
@@ -125,7 +144,7 @@
 //! sensor data. To update a sensor value, send a HTTP POST request to the
 //! `/sensors/<sensor-id>/` endpoint with the `value` parameter:
 //!
-//! ```
+//! ```text
 //! curl -v -X PUT -d value=42 http://127.0.0.1:8000/sensors/people_now_present/
 //! curl -v -X PUT -d value=13.37 http://127.0.0.1:8000/sensors/temp_room1/
 //! ```
@@ -155,17 +174,20 @@
 //! Alternatively you can modify the values in Redis directly. You can access
 //! the database with the `redis-cli` tool:
 //! 
-//!     % redis-cli
-//!     127.0.0.1:6379> SET people_now_present 1
-//!     OK
-//!     127.0.0.1:6379> GET people_now_present
-//!     "1"
-//!     127.0.0.1:6379> KEYS *
-//!     1) "people_now_present"
-//!     2) "temp_room1"
+//! ```text
+//! % redis-cli
+//! 127.0.0.1:6379> SET people_now_present 1
+//! OK
+//! 127.0.0.1:6379> GET people_now_present
+//! "1"
+//! 127.0.0.1:6379> KEYS *
+//! 1) "people_now_present"
+//! 2) "temp_room1"
+//! ```
 //! 
 //! The keys need to match the IDs you used when registering the sensor.
 
+#![deny(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/spaceapi-server")]
 
 pub use spaceapi as api;
@@ -176,7 +198,7 @@ pub use iron::Listening;
 mod server;
 mod errors;
 mod types;
-pub mod sensors;
+mod sensors;
 pub mod modifiers;
 
 pub use crate::server::SpaceapiServer;

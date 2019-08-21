@@ -30,6 +30,8 @@ enum RedisInfo {
     Err(SpaceapiServerError),
 }
 
+/// Builder to create a new [`SpaceapiServer`](struct.SpaceapiServer.html)
+/// instance.
 pub struct SpaceapiServerBuilder {
     status: api::Status,
     redis_info: RedisInfo,
@@ -39,6 +41,7 @@ pub struct SpaceapiServerBuilder {
 
 impl SpaceapiServerBuilder {
 
+    /// Create a new builder instance based on the provided static status data.
     pub fn new(mut status: api::Status) -> SpaceapiServerBuilder {
         // Instantiate versions object
         let mut versions = Map::new();
@@ -56,6 +59,17 @@ impl SpaceapiServerBuilder {
         }
     }
 
+    /// Specify a Redis connection string.
+    ///
+    /// This can be any object that implements
+    /// [`redis::IntoConnectionInfo`](../redis/trait.IntoConnectionInfo.html),
+    /// e.g. a connection string:
+    ///
+    /// ```ignore
+    /// ...
+    /// .redis_connection_info("redis://127.0.0.1/")
+    /// ...
+    /// ```
     pub fn redis_connection_info<R: IntoConnectionInfo>(mut self, redis_connection_info: R) -> Self {
         self.redis_info = match redis_connection_info.into_connection_info() {
             Ok(ci) => RedisInfo::ConnectionInfo(ci),
@@ -64,11 +78,26 @@ impl SpaceapiServerBuilder {
         self
     }
 
+    /// Use this as an alternative to
+    /// [`redis_connection_info`](struct.SpaceapiServerBuilder.html#method.redis_connection_info)
+    /// if you want to initialize the Redis connection pool yourself, to have
+    /// full control over the connection parameters.
+    ///
+    /// See
+    /// [`examples/with_custom_redis_pool.rs`](https://github.com/spaceapi-community/spaceapi-server-rs/blob/master/examples/with_custom_redis_pool.rs)
+    /// for a real example.
     pub fn redis_pool(mut self, redis_pool: r2d2::Pool<r2d2_redis::RedisConnectionManager>) -> Self {
         self.redis_info = RedisInfo::Pool(redis_pool);
         self
     }
 
+    /// Add a status modifier, that modifies the status dynamically per
+    /// request.
+    ///
+    /// This can be an instance of
+    /// [`modifiers::StateFromPeopleNowPresent`](modifiers/struct.StateFromPeopleNowPresent.html),
+    /// or your own implementation that uses the dynamic sensor data and/or
+    /// external data.
     pub fn add_status_modifier<M: modifiers::StatusModifier + 'static>(mut self, modifier: M) -> Self {
         self.status_modifiers.push(Box::new(modifier));
         self
@@ -85,8 +114,10 @@ impl SpaceapiServerBuilder {
         self
     }
 
+    /// Build a server instance.
+    ///
+    /// This can fail if not all required data has been provided.
     pub fn build(self) -> Result<SpaceapiServer, SpaceapiServerError> {
-
         let pool = match self.redis_info {
             RedisInfo::None => Err("No redis connection defined".into()),
             RedisInfo::Err(e) => Err(e),
@@ -127,7 +158,7 @@ impl SpaceapiServerBuilder {
 }
 
 
-/// A Space API server instance.
+/// A SpaceAPI server instance.
 ///
 /// You can create a new instance using the ``new`` constructor method by
 /// passing it the host, the port, the ``Status`` object and a redis connection info object.

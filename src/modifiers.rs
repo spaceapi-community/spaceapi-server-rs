@@ -1,4 +1,5 @@
-/// Modifiers which can be injected by the application logic to change the state
+//! Modifiers which can be injected by the application logic to change the
+//! state dynamically per request.
 
 use crate::api;
 

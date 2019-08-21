@@ -15,6 +15,9 @@ Possible log types:
 
 - [changed] Bump dependencies, including spaceapi which now uses an enum for
   the `issue_report_channels` (#92)
+- [added] Add usage and API documentation (#94)
+- [changed] Some internal types that were never meant to be
+  used outside the crate are now not public anymore (#94)
 
 ### v0.4.1 (2018-06-28)
 
