@@ -21,8 +21,8 @@ fn main() {
             twitter: Some("@coredump_ch".into()),
             ..Default::default()
         })
-        .add_issue_report_channel("email")
-        .add_issue_report_channel("twitter")
+        .add_issue_report_channel(api::IssueReportChannel::Email)
+        .add_issue_report_channel(api::IssueReportChannel::Twitter)
         .build()
         .expect("Creating status failed");
 

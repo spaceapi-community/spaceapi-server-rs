@@ -57,7 +57,7 @@ fn main() {
             issue_mail: Some("sysadmin@mittelab.org".into()),
             ..Default::default()
         })
-        .add_issue_report_channel("email")
+        .add_issue_report_channel(api::IssueReportChannel::Email)
         .add_project("https://git.mittelab.org")
         .add_project("https://github.com/mittelab")
         .add_project("https://wiki.mittelab.org/progetti/")

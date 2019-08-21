@@ -1,10 +1,9 @@
+use std::io::ErrorKind;
 use std::net::Ipv4Addr;
 use std::net::TcpStream;
-use std::io::ErrorKind;
 
-use spaceapi_server::{SpaceapiServer, SpaceapiServerBuilder};
 use spaceapi_server::api;
-
+use spaceapi_server::{SpaceapiServer, SpaceapiServerBuilder};
 
 /// Create a new status object containing test data.
 fn get_status() -> api::Status {
@@ -31,12 +30,11 @@ fn get_status() -> api::Status {
             keymasters: None,
             sip: None,
         })
-        .add_issue_report_channel("email")
-        .add_issue_report_channel("twitter")
+        .add_issue_report_channel(api::IssueReportChannel::Email)
+        .add_issue_report_channel(api::IssueReportChannel::Twitter)
         .build()
         .unwrap()
 }
-
 
 /// Create a new SpaceapiServer instance listening on the specified port.
 fn get_server(status: api::Status) -> SpaceapiServer {
@@ -45,7 +43,6 @@ fn get_server(status: api::Status) -> SpaceapiServer {
         .build()
         .unwrap()
 }
-
 
 #[test]
 fn server_starts() {
