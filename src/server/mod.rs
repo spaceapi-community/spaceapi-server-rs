@@ -4,23 +4,23 @@ use std::net::ToSocketAddrs;
 use std::sync::Arc;
 use std::time::Duration;
 
-use r2d2;
-use r2d2_redis::RedisConnectionManager;
 use iron::Iron;
 use log::debug;
+use r2d2;
+use r2d2_redis::RedisConnectionManager;
+use redis::{ConnectionInfo, IntoConnectionInfo};
 use router::Router;
-use redis::{IntoConnectionInfo, ConnectionInfo};
 
-use serde_json::Value;
 use serde_json::map::Map;
+use serde_json::Value;
 
 mod handlers;
 
 use crate::api;
 
-use crate::sensors;
-use crate::modifiers;
 use crate::errors::SpaceapiServerError;
+use crate::modifiers;
+use crate::sensors;
 use crate::types::RedisPool;
 
 enum RedisInfo {
@@ -40,7 +40,6 @@ pub struct SpaceapiServerBuilder {
 }
 
 impl SpaceapiServerBuilder {
-
     /// Create a new builder instance based on the provided static status data.
     pub fn new(mut status: api::Status) -> SpaceapiServerBuilder {
         // Instantiate versions object
@@ -49,7 +48,9 @@ impl SpaceapiServerBuilder {
         versions.insert("spaceapi-server-rs".into(), crate::get_version().into());
 
         // Add to extensions
-        status.extensions.insert("versions".into(), Value::Object(versions));
+        status
+            .extensions
+            .insert("versions".into(), Value::Object(versions));
 
         SpaceapiServerBuilder {
             status,
@@ -108,9 +109,10 @@ impl SpaceapiServerBuilder {
     /// The first argument is a ``api::SensorTemplate`` instance containing all static data.
     /// The second argument specifies how to get the actual sensor value from Redis.
     pub fn add_sensor<T: api::SensorTemplate + 'static>(mut self, template: T, data_key: String) -> Self {
-        self.sensor_specs.push(
-            sensors::SensorSpec { template: Box::new(template), data_key }
-        );
+        self.sensor_specs.push(sensors::SensorSpec {
+            template: Box::new(template),
+            data_key,
+        });
         self
     }
 
@@ -124,8 +126,7 @@ impl SpaceapiServerBuilder {
             RedisInfo::Pool(p) => Ok(p),
             RedisInfo::ConnectionInfo(ci) => {
                 // Log some useful debug information
-                debug!("Connecting to redis database {} at {:?}",
-                       ci.db, ci.addr);
+                debug!("Connecting to redis database {} at {:?}", ci.db, ci.addr);
 
                 // Create redis pool
                 let redis_config = r2d2::Config::builder()
@@ -157,7 +158,6 @@ impl SpaceapiServerBuilder {
     }
 }
 
-
 /// A SpaceAPI server instance.
 ///
 /// You can create a new instance using the ``new`` constructor method by
@@ -173,17 +173,26 @@ pub struct SpaceapiServer {
 }
 
 impl SpaceapiServer {
-
     /// Create and return a Router instance.
     fn route(self) -> Router {
         let mut router = Router::new();
 
-        router.get("/", handlers::ReadHandler::new(
-            self.status.clone(), self.redis_pool.clone(),
-            self.sensor_specs.clone(), self.status_modifiers), "root");
+        router.get(
+            "/",
+            handlers::ReadHandler::new(
+                self.status.clone(),
+                self.redis_pool.clone(),
+                self.sensor_specs.clone(),
+                self.status_modifiers,
+            ),
+            "root",
+        );
 
-        router.put("/sensors/:sensor/", handlers::UpdateHandler::new(
-            self.redis_pool.clone(), self.sensor_specs.clone()), "sensors");
+        router.put(
+            "/sensors/:sensor/",
+            handlers::UpdateHandler::new(self.redis_pool.clone(), self.sensor_specs.clone()),
+            "sensors",
+        );
 
         router
     }
