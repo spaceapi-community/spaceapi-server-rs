@@ -1,12 +1,12 @@
-extern crate spaceapi_server;
 extern crate env_logger;
-extern crate redis;
 extern crate r2d2;
 extern crate r2d2_redis;
+extern crate redis;
+extern crate spaceapi_server;
 
-use spaceapi_server::SpaceapiServerBuilder;
 use spaceapi_server::api;
 use spaceapi_server::modifiers::StatusModifier;
+use spaceapi_server::SpaceapiServerBuilder;
 
 use r2d2::Pool;
 use r2d2_redis::RedisConnectionManager;
@@ -15,22 +15,22 @@ use redis::{Commands, RedisResult};
 type RedisPool = Pool<RedisConnectionManager>;
 
 struct OpenStatusFromRedisModifier {
-    pool: RedisPool
+    pool: RedisPool,
 }
 
 impl OpenStatusFromRedisModifier {
     fn new(pool: RedisPool) -> OpenStatusFromRedisModifier {
-        OpenStatusFromRedisModifier{pool}
+        OpenStatusFromRedisModifier { pool }
     }
 }
 
 impl StatusModifier for OpenStatusFromRedisModifier {
     fn modify(&self, status: &mut api::Status) {
         let conn = self.pool.get().unwrap();
-        let state : RedisResult<String> = conn.get("state_open");
+        let state: RedisResult<String> = conn.get("state_open");
         status.state.open = match state {
             Ok(v) => Some(v == "open"),
-            Err(_) => None
+            Err(_) => None,
         };
         status.state.lastchange = conn.get("state_lastchange").ok();
         status.state.trigger_person = conn.get("state_triggerperson").ok();
@@ -38,7 +38,7 @@ impl StatusModifier for OpenStatusFromRedisModifier {
 }
 
 fn main() {
-    env_logger::init().unwrap();
+    env_logger::init();
 
     let status = api::StatusBuilder::new("Mittelab")
         .logo("https://www.mittelab.org/images/logo.svg")
@@ -57,13 +57,12 @@ fn main() {
             issue_mail: Some("sysadmin@mittelab.org".into()),
             ..Default::default()
         })
-        .add_issue_report_channel("email")
+        .add_issue_report_channel(api::IssueReportChannel::Email)
         .add_project("https://git.mittelab.org")
         .add_project("https://github.com/mittelab")
         .add_project("https://wiki.mittelab.org/progetti/")
         .build()
         .expect("Creating status failed");
-
 
     let config = Default::default();
     let manager = r2d2_redis::RedisConnectionManager::new("redis://localhost").unwrap();
@@ -78,5 +77,7 @@ fn main() {
         .expect("Could not initialize server");
 
     // Serve!
-    server.serve("127.0.0.1:8000").expect("Could not start the server");
+    server
+        .serve("127.0.0.1:8000")
+        .expect("Could not start the server");
 }

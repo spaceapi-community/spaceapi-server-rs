@@ -11,6 +11,10 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### Unreleased
+
+- [changed] Bump dependencies, including spaceapi which now uses an enum for
+  the `issue_report_channels` (#92)
 
 ### v0.4.1 (2018-06-28)
 
