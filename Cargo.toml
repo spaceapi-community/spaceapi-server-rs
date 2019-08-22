@@ -9,7 +9,7 @@ authors = [
     "Danilo Bargen <mail@dbrgn.ch>",
     "Stefan Schindler <stefan@estada.ch>",
 ]
-description = "A library that allows you to easily implement a Space API server."
+description = "A library that allows you to easily implement a SpaceAPI server."
 readme = "README.md"
 keywords = ["spaceapi", "hackerspaces", "status", "api", "server"]
 include = [

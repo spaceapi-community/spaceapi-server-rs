@@ -33,7 +33,7 @@ impl Serialize for ErrorResponse {
     }
 }
 
-pub struct ReadHandler {
+pub(crate) struct ReadHandler {
     status: api::Status,
     redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
@@ -41,7 +41,7 @@ pub struct ReadHandler {
 }
 
 impl ReadHandler {
-    pub fn new(status: api::Status,
+    pub(crate) fn new(status: api::Status,
                redis_pool: RedisPool,
                sensor_specs: sensors::SafeSensorSpecs,
                status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>)
@@ -121,14 +121,14 @@ impl middleware::Handler for ReadHandler {
 }
 
 
-pub struct UpdateHandler {
+pub(crate) struct UpdateHandler {
     redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
 }
 
 
 impl UpdateHandler {
-    pub fn new(redis_pool: RedisPool, sensor_specs: sensors::SafeSensorSpecs)
+    pub(crate) fn new(redis_pool: RedisPool, sensor_specs: sensors::SafeSensorSpecs)
                -> UpdateHandler {
         UpdateHandler {
             redis_pool,

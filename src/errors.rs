@@ -11,18 +11,22 @@ quick_error! {
     /// A ``SpaceapiServerError`` wraps general problems that can occur in the SpaceAPI server.
     #[derive(Debug)]
     pub enum SpaceapiServerError {
+        /// A problem with redis occurred.
         Redis(err: RedisError) {
             from()
             cause(err)
         }
+        /// A problem with the redis connection pool occurred.
         R2d2(err: InitializationError) {
             from()
             cause(err)
         }
+        /// An I/O error occurred.
         IoError(err: io::Error) {
             from()
             cause(err)
         }
+        /// Another error happened.
         Message(err: Cow<'static, str>) {
             description(&**err)
             from(s: &'static str) -> (s.into())
