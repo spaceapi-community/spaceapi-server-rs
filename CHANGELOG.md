@@ -14,7 +14,8 @@ Possible log types:
 ### Unreleased
 
 - [changed] Bump dependencies, including spaceapi which now uses an enum for
-  the `issue_report_channels` (#92)
+  the `issue_report_channels` see the [spaceapi changelog] for more details
+  (#92, #97)
 - [added] Add usage and API documentation (#94)
 - [changed] Some internal types that were never meant to be
   used outside the crate are now not public anymore (#94)
@@ -60,3 +61,6 @@ Possible log types:
 ### v0.1.0 (2015-11-14)
 
 - First crates.io release
+
+
+[spaceapi changelog]: https://github.com/spaceapi-community/spaceapi-rs/blob/master/CHANGELOG.md
