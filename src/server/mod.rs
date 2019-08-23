@@ -37,6 +37,7 @@ pub struct SpaceapiServerBuilder {
     redis_info: RedisInfo,
     sensor_specs: Vec<sensors::SensorSpec>,
     status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
+    update_security: UpdateSecurity,
 }
 
 impl SpaceapiServerBuilder {
@@ -57,6 +58,7 @@ impl SpaceapiServerBuilder {
             redis_info: RedisInfo::None,
             sensor_specs: vec![],
             status_modifiers: vec![],
+            update_security: UpdateSecurity::HmacSha256,
         }
     }
 
@@ -116,6 +118,15 @@ impl SpaceapiServerBuilder {
         self
     }
 
+    /// Use a certain update security mode for the sensor values.
+    ///
+    /// See [`UpdateSecurity`](enum.UpdateSecurity.html) for more details. By
+    /// default, `HmacSha256` will be used.
+    pub fn with_update_security_mode(mut self, mode: UpdateSecurity) -> Self {
+        self.update_security = mode;
+        self
+    }
+
     /// Build a server instance.
     ///
     /// This can fail if not all required data has been provided.
@@ -154,6 +165,7 @@ impl SpaceapiServerBuilder {
             redis_pool: pool?,
             sensor_specs: Arc::new(self.sensor_specs),
             status_modifiers: self.status_modifiers,
+            update_security: self.update_security,
         })
     }
 }
@@ -170,6 +182,7 @@ pub struct SpaceapiServer {
     redis_pool: RedisPool,
     sensor_specs: sensors::SafeSensorSpecs,
     status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
+    update_security: UpdateSecurity,
 }
 
 impl SpaceapiServer {
@@ -188,11 +201,25 @@ impl SpaceapiServer {
             "root",
         );
 
-        router.put(
-            "/sensors/:sensor/",
-            handlers::UpdateHandler::new(self.redis_pool.clone(), self.sensor_specs.clone()),
-            "sensors",
-        );
+        // Add route to update sensor values
+        if let UpdateSecurity::NoUpdates = self.update_security {
+            // No route needed
+        } else {
+            router.put(
+                "/sensors/:sensor/",
+                handlers::UpdateHandler::new(self.redis_pool.clone(), self.sensor_specs.clone()),
+                "sensors",
+            );
+        }
+
+        // Add route to create session
+        if let UpdateSecurity::HmacSha256 = self.update_security {
+            router.post(
+                "/sensors/:sensor/sessions/",
+                handlers::CreateSessionHandler::new(self.redis_pool.clone(), self.sensor_specs.clone()),
+                "sessions",
+            );
+        }
 
         router
     }
@@ -211,4 +238,22 @@ impl SpaceapiServer {
         }
         Iron::new(router).http(socket_addr)
     }
+}
+
+/// The security mode used to update sensor values dynamically.
+///
+/// If you don't want to update sensor values through spaceapi-server-rs,
+/// choose `NoUpdates` which disables updates completely.
+///
+/// The recommended variant is `HmacSha256`.
+pub enum UpdateSecurity {
+    /// No authentication. Anybody can update sensor values.
+    Insecure,
+    /// Static auth token. Can be sniffed by anybody if connection is not
+    /// encrypted. Vulnerable to replay attacks.
+    StaticToken,
+    /// Session based HMAC-SHA256 signatures. This is the recommended mode.
+    HmacSha256,
+    /// Disallow updates through the API.
+    NoUpdates,
 }
