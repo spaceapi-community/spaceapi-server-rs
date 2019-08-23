@@ -173,7 +173,7 @@
 //!
 //! Alternatively you can modify the values in Redis directly. You can access
 //! the database with the `redis-cli` tool:
-//! 
+//!
 //! ```text
 //! % redis-cli
 //! 127.0.0.1:6379> SET people_now_present 1
@@ -184,7 +184,7 @@
 //! 1) "people_now_present"
 //! 2) "temp_room1"
 //! ```
-//! 
+//!
 //! The keys need to match the IDs you used when registering the sensor.
 
 #![deny(missing_docs)]
@@ -195,15 +195,15 @@ pub use spaceapi as api;
 pub use iron::error::HttpResult;
 pub use iron::Listening;
 
-mod server;
 mod errors;
-mod types;
-mod sensors;
 pub mod modifiers;
+mod sensors;
+mod server;
+mod types;
 
+pub use crate::errors::SpaceapiServerError;
 pub use crate::server::SpaceapiServer;
 pub use crate::server::SpaceapiServerBuilder;
-pub use crate::errors::SpaceapiServerError;
 
 /// Return own crate version. Used in API responses.
 pub fn get_version() -> &'static str {

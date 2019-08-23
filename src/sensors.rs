@@ -50,7 +50,6 @@ quick_error! {
 pub(crate) type SafeSensorSpecs = Arc<Vec<SensorSpec>>;
 
 impl SensorSpec {
-
     /// Retrieve sensor value from Redis.
     pub(crate) fn get_sensor_value(&self, redis_pool: &RedisPool) -> Result<String, SensorError> {
         let conn = redis_pool.get()?;
@@ -64,5 +63,4 @@ impl SensorSpec {
         let _: String = conn.set(&*self.data_key, value)?;
         Ok(())
     }
-
 }
