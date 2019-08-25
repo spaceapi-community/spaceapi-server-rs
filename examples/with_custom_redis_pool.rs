@@ -26,7 +26,7 @@ impl OpenStatusFromRedisModifier {
 
 impl StatusModifier for OpenStatusFromRedisModifier {
     fn modify(&self, status: &mut api::Status) {
-        let conn = self.pool.get().unwrap();
+        let mut conn = self.pool.get().unwrap();
         let state: RedisResult<String> = conn.get("state_open");
         status.state.open = match state {
             Ok(v) => Some(v == "open"),
@@ -64,9 +64,8 @@ fn main() {
         .build()
         .expect("Creating status failed");
 
-    let config = Default::default();
     let manager = r2d2_redis::RedisConnectionManager::new("redis://localhost").unwrap();
-    let pool = r2d2::Pool::new(config, manager).unwrap();
+    let pool = r2d2::Pool::builder().build(manager).unwrap();
 
     // Set up server
     let server = SpaceapiServerBuilder::new(status)

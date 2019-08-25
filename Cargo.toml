@@ -24,9 +24,9 @@ include = [
 edition = "2018"
 
 [dependencies]
-r2d2 = "^0.7"
-r2d2_redis = "^0.6"
-redis = "^0.8"
+r2d2 = "^0.8.5"
+r2d2_redis = "^0.10.1"
+redis = "^0.11"
 log = "^0.4"
 iron = "^0.6.1"
 urlencoded = "^0.6"

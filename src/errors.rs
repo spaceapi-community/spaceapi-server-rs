@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::io;
 
 use quick_error::quick_error;
-use r2d2::InitializationError;
+use r2d2::Error as R2d2Error;
 use redis::RedisError;
 
 quick_error! {
@@ -17,7 +17,7 @@ quick_error! {
             cause(err)
         }
         /// A problem with the redis connection pool occurred.
-        R2d2(err: InitializationError) {
+        R2d2(err: R2d2Error) {
             from()
             cause(err)
         }
