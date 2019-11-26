@@ -7,14 +7,22 @@
 This is a library that allows an easy implementation of a
 [SpaceAPI](https://spaceapi.io/) v0.13 server in Rust.
 
-- Crate Documentation: https://docs.rs/spaceapi-server/
-- Space API Reference: https://spaceapi.io/pages/docs.html
+ * Crate Documentation: https://docs.rs/spaceapi-server/
+ * Space API Reference: https://spaceapi.io/pages/docs.html
 
 
 ## Requirements
 
- * Rust 1.31 or newer
  * A Redis instance on the server
+
+
+## Rust Version Requirements (MSRV)
+
+This library generally tracks the latest stable Rust version but tries to
+guarantee backwards compatibility with older stable versions as much as
+possible. However, in many cases transitive dependencies make guaranteeing a
+minimal supported Rust version impossible (see [this
+discussion](https://users.rust-lang.org/t/rust-version-requirement-change-as-semver-breaking-or-not/20980/25)).
 
 
 ## Usage
