@@ -13,6 +13,8 @@ Possible log types:
 
 ### Unreleased
 
+### v0.5.0 (2019-12-30)
+
 - [changed] Do not guarantee a fixed MSRV anymore (#99)
 - [changed] Bump dependencies, including spaceapi which now uses an enum for
   the `issue_report_channels` see the [spaceapi changelog] for more details
