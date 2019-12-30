@@ -18,7 +18,7 @@ Possible log types:
   the `issue_report_channels` see the [spaceapi changelog] for more details
   (#92, #97)
 - [changed] Bump redis version. This changes some inner types in the
-  `SpaceapiServerError` (#96)
+  `SpaceapiServerError` (#96, #100)
 - [added] Add usage and API documentation (#94)
 - [changed] Some internal types that were never meant to be
   used outside the crate are now not public anymore (#94)
