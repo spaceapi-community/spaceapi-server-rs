@@ -24,6 +24,7 @@ Possible log types:
 - [added] Add usage and API documentation (#94)
 - [changed] Some internal types that were never meant to be
   used outside the crate are now not public anymore (#94)
+- [added] Allow to set custom redis pool for custom options (#90)
 
 ### v0.4.1 (2018-06-28)
 
