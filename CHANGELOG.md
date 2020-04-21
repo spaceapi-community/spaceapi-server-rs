@@ -13,7 +13,7 @@ Possible log types:
 
 ### Unreleased
 
-### v0.5.0 (2019-12-30)
+### v0.5.0 (2020-04-21)
 
 - [changed] Replace last use of `rustc_serialize` with `serde` (#86)
 - [changed] Move to Rust 2018 edition (#88)
