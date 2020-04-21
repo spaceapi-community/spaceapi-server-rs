@@ -13,6 +13,8 @@ Possible log types:
 
 ### Unreleased
 
+- [changed] Update redis to 0.15 and r2d2\_redis to 0.13 (#105)
+
 ### v0.5.0 (2020-04-21)
 
 - [changed] Replace last use of `rustc_serialize` with `serde` (#86)
