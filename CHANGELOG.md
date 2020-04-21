@@ -13,6 +13,10 @@ Possible log types:
 
 ### Unreleased
 
+### v0.5.0 (2020-04-21)
+
+- [changed] Replace last use of `rustc_serialize` with `serde` (#86)
+- [changed] Move to Rust 2018 edition (#88)
 - [changed] Do not guarantee a fixed MSRV anymore (#99)
 - [changed] Bump dependencies, including spaceapi which now uses an enum for
   the `issue_report_channels` see the [spaceapi changelog] for more details
@@ -22,6 +26,8 @@ Possible log types:
 - [added] Add usage and API documentation (#94)
 - [changed] Some internal types that were never meant to be
   used outside the crate are now not public anymore (#94)
+- [added] Allow to set custom redis pool for custom options (#90)
+- [fixed] Panic in `StateFromPeopleNowPresent` (#104)
 
 ### v0.4.1 (2018-06-28)
 
