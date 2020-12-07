@@ -1,5 +1,5 @@
 use spaceapi_server::api;
-use spaceapi_server::SpaceapiServerBuilder;
+use spaceapi_server::{SpaceapiServerBuilder, UpdateSecurity};
 
 fn main() {
     // Create new minimal Status instance
@@ -24,6 +24,7 @@ fn main() {
     // Set up server
     let server = SpaceapiServerBuilder::new(status)
         .redis_connection_info("redis://127.0.0.1/")
+        .with_update_security_mode(UpdateSecurity::NoUpdates)
         .build()
         .unwrap();
 

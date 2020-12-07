@@ -2,7 +2,7 @@ use env_logger;
 use spaceapi_server::api;
 use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
 use spaceapi_server::modifiers::StateFromPeopleNowPresent;
-use spaceapi_server::SpaceapiServerBuilder;
+use spaceapi_server::{SpaceapiServerBuilder, UpdateSecurity};
 
 fn main() {
     env_logger::init();
@@ -29,6 +29,7 @@ fn main() {
     // Set up server
     let server = SpaceapiServerBuilder::new(status)
         .redis_connection_info("redis://127.0.0.1/")
+        .with_update_security_mode(UpdateSecurity::Insecure)
         .add_status_modifier(StateFromPeopleNowPresent)
         .add_sensor(
             PeopleNowPresentSensorTemplate {

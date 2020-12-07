@@ -4,6 +4,9 @@ use iron::modifiers::Header;
 use iron::prelude::*;
 use iron::{headers, middleware, status};
 use log::{debug, error, info, warn};
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
+use redis::Commands;
 use router::Router;
 use serde::ser::{Serialize, SerializeMap, Serializer};
 use serde_json;
@@ -14,6 +17,8 @@ use crate::api;
 use crate::modifiers;
 use crate::sensors;
 use crate::types::RedisPool;
+
+const SESSION_VALIDITY_S: usize = 60;
 
 #[derive(Debug)]
 struct ErrorResponse {
@@ -30,6 +35,23 @@ impl Serialize for ErrorResponse {
         map.serialize_entry("reason", &self.reason)?;
         map.end()
     }
+}
+
+/// Build an error response with the specified `error_code` and the specified `reason` text.
+fn err_response(error_code: status::Status, reason: &str) -> Response {
+    let error = ErrorResponse {
+        reason: reason.into(),
+    };
+    let error_string = serde_json::to_string(&error).expect("Could not serialize error");
+    Response::with((error_code, error_string))
+        // Set headers
+        .set(Header(headers::ContentType(
+            "application/json; charset=utf-8".parse().unwrap(),
+        )))
+        .set(Header(headers::CacheControl(vec![
+            headers::CacheDirective::NoCache,
+        ])))
+        .set(Header(headers::AccessControlAllowOrigin::Any))
 }
 
 pub(crate) struct ReadHandler {
@@ -149,36 +171,6 @@ impl UpdateHandler {
         // Store data
         sensor_spec.set_sensor_value(&self.redis_pool, value)
     }
-
-    /// Build an OK response with the `HTTP 204 No Content` status code.
-    fn ok_response(&self) -> Response {
-        Response::with(status::NoContent)
-            // Set headers
-            .set(Header(headers::ContentType(
-                "application/json; charset=utf-8".parse().unwrap(),
-            )))
-            .set(Header(headers::CacheControl(vec![
-                headers::CacheDirective::NoCache,
-            ])))
-            .set(Header(headers::AccessControlAllowOrigin::Any))
-    }
-
-    /// Build an error response with the specified `error_code` and the specified `reason` text.
-    fn err_response(&self, error_code: status::Status, reason: &str) -> Response {
-        let error = ErrorResponse {
-            reason: reason.into(),
-        };
-        let error_string = serde_json::to_string(&error).expect("Could not serialize error");
-        Response::with((error_code, error_string))
-            // Set headers
-            .set(Header(headers::ContentType(
-                "application/json; charset=utf-8".parse().unwrap(),
-            )))
-            .set(Header(headers::CacheControl(vec![
-                headers::CacheDirective::NoCache,
-            ])))
-            .set(Header(headers::AccessControlAllowOrigin::Any))
-    }
 }
 
 impl middleware::Handler for UpdateHandler {
@@ -202,9 +194,14 @@ impl middleware::Handler for UpdateHandler {
             sensor_value = match params.get("value") {
                 Some(ref values) => match values.len() {
                     1 => values[0].to_string(),
-                    _ => return Ok(self.err_response(status::BadRequest, "Too many values specified")),
+                    _ => return Ok(err_response(status::BadRequest, "Too many values specified")),
                 },
-                None => return Ok(self.err_response(status::BadRequest, "\"value\" parameter not specified")),
+                None => {
+                    return Ok(err_response(
+                        status::BadRequest,
+                        "\"value\" parameter not specified",
+                    ))
+                }
             }
         }
 
@@ -216,17 +213,103 @@ impl middleware::Handler for UpdateHandler {
             );
             let response = match e {
                 sensors::SensorError::UnknownSensor(sensor) => {
-                    self.err_response(status::BadRequest, &format!("Unknown sensor: {}", sensor))
+                    err_response(status::BadRequest, &format!("Unknown sensor: {}", sensor))
                 }
                 sensors::SensorError::Redis(_) | sensors::SensorError::R2d2(_) => {
-                    self.err_response(status::InternalServerError, "Updating values in datastore failed")
+                    err_response(status::InternalServerError, "Updating values in datastore failed")
                 }
             };
             return Ok(response);
         };
 
         // Create response
-        Ok(self.ok_response())
+        Ok(Response::with(status::NoContent)
+            // Set headers
+            .set(Header(headers::ContentType(
+                "application/json; charset=utf-8".parse().unwrap(),
+            )))
+            .set(Header(headers::CacheControl(vec![
+                headers::CacheDirective::NoCache,
+            ])))
+            .set(Header(headers::AccessControlAllowOrigin::Any)))
+    }
+}
+
+pub(crate) struct CreateSessionHandler {
+    redis_pool: RedisPool,
+    sensor_specs: sensors::SafeSensorSpecs,
+}
+
+impl CreateSessionHandler {
+    pub(crate) fn new(redis_pool: RedisPool, sensor_specs: sensors::SafeSensorSpecs) -> Self {
+        Self {
+            redis_pool,
+            sensor_specs,
+        }
+    }
+
+    fn create_random_token(&self) -> String {
+        thread_rng().sample_iter(&Alphanumeric).take(12).collect()
+    }
+}
+
+impl middleware::Handler for CreateSessionHandler {
+    /// Create a new session.
+    fn handle(&self, req: &mut Request) -> IronResult<Response> {
+        // TODO: create macro for these info! invocations.
+        info!("{} /{} from {}", req.method, req.url.path()[0], req.remote_addr);
+
+        // Get sensor name
+        // TODO: Properly propagate errors
+        let params = req.extensions.get::<Router>().unwrap();
+        let sensor_name = params.find("sensor").unwrap().to_string();
+
+        // Validate sensor
+        if !self
+            .sensor_specs
+            .iter()
+            .any(|ref spec| spec.data_key == sensor_name)
+        {
+            return Ok(err_response(
+                status::BadRequest,
+                &format!("Unknown sensor: {}", sensor_name),
+            ));
+        }
+
+        // Create token
+        let token = self.create_random_token();
+
+        // Create session
+        let conn = match self.redis_pool.get() {
+            Ok(conn) => conn,
+            Err(e) => {
+                error!("Could not get redis connection: {}", e);
+                return Ok(err_response(
+                    status::InternalServerError,
+                    "Could not get redis connection",
+                ));
+            }
+        };
+        let key = format!("{}.session.{}", sensor_name, token);
+        match conn.set_ex(&key, "active_session", SESSION_VALIDITY_S) {
+            Ok(()) => {}
+            Err(e) => {
+                error!("Could not create session: {}", e);
+                return Ok(err_response(
+                    status::InternalServerError,
+                    "Could not create session in database",
+                ));
+            }
+        };
+
+        // Return token
+        Ok(Response::with((status::Created, token))
+            // Set headers
+            .set(Header(headers::ContentType("text/plain".parse().unwrap())))
+            .set(Header(headers::CacheControl(vec![
+                headers::CacheDirective::NoCache,
+            ])))
+            .set(Header(headers::AccessControlAllowOrigin::Any)))
     }
 }
 

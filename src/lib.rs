@@ -204,6 +204,7 @@ mod types;
 pub use crate::errors::SpaceapiServerError;
 pub use crate::server::SpaceapiServer;
 pub use crate::server::SpaceapiServerBuilder;
+pub use crate::server::UpdateSecurity;
 
 /// Return own crate version. Used in API responses.
 pub fn get_version() -> &'static str {
