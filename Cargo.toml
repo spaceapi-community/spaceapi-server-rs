@@ -38,4 +38,4 @@ quick-error = "1.2"
 
 
 [dev-dependencies]
-env_logger = "^0.7.1"
+env_logger = "^0.8.3"
