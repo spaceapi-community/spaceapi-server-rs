@@ -6,7 +6,6 @@ use std::time::Duration;
 
 use iron::Iron;
 use log::debug;
-use r2d2;
 use r2d2_redis::RedisConnectionManager;
 use redis::{ConnectionInfo, IntoConnectionInfo};
 use router::Router;
@@ -190,7 +189,7 @@ impl SpaceapiServer {
 
         router.put(
             "/sensors/:sensor/",
-            handlers::UpdateHandler::new(self.redis_pool.clone(), self.sensor_specs.clone()),
+            handlers::UpdateHandler::new(self.redis_pool.clone(), self.sensor_specs),
             "sensors",
         );
 

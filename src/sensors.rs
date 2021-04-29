@@ -3,7 +3,6 @@
 use std::sync::Arc;
 
 use quick_error::quick_error;
-use r2d2;
 use redis::Commands;
 use redis::RedisError;
 
@@ -31,17 +30,17 @@ quick_error! {
     pub enum SensorError {
         /// Sensor `data_key` not known
         UnknownSensor(err: String) {
-            description(err)
+            display("Unknown sensor: {}", err)
         }
         /// Redis error
         Redis(err: RedisError) {
             from()
-            cause(err)
+            source(err)
         }
         /// R2d2 connection pool error
         R2d2(err: r2d2::Error) {
             from()
-            cause(err)
+            source(err)
         }
     }
 }

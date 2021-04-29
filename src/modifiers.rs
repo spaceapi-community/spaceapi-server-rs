@@ -23,6 +23,8 @@ impl StatusModifier for StateFromPeopleNowPresent {
             .map(|sensor: &api::PeopleNowPresentSensor| sensor.value);
         if let Some(count) = people_now_present {
             status.state.open = Some(count > 0);
+            // comparison chain is actually cleaner here IMO
+            #[allow(clippy::comparison_chain)]
             if count == 1 {
                 status.state.message = Some(format!("{} person here right now", count));
             } else if count > 1 {
@@ -41,8 +43,10 @@ mod tests {
 
         #[test]
         fn no_sensors() {
-            let mut status = api::Status::default();
-            status.sensors = None;
+            let mut status = api::Status {
+                sensors: None,
+                ..api::Status::default()
+            };
             assert_eq!(status.state.message, None);
             StateFromPeopleNowPresent.modify(&mut status);
             assert_eq!(status.sensors, None);
@@ -51,11 +55,13 @@ mod tests {
 
         #[test]
         fn no_people_present_sensor() {
-            let mut status = api::Status::default();
-            status.sensors = Some(api::Sensors {
-                people_now_present: vec![],
-                temperature: vec![],
-            });
+            let mut status = api::Status {
+                sensors: Some(api::Sensors {
+                    people_now_present: vec![],
+                    temperature: vec![],
+                }),
+                ..api::Status::default()
+            };
             assert_eq!(status.state.message, None);
             StateFromPeopleNowPresent.modify(&mut status);
             assert_eq!(status.state.message, None);
@@ -73,12 +79,14 @@ mod tests {
 
         #[test]
         fn zero_people_present() {
-            let mut status = api::Status::default();
+            let mut status = api::Status {
+                sensors: Some(api::Sensors {
+                    people_now_present: vec![make_pnp_sensor(0)],
+                    temperature: vec![],
+                }),
+                ..api::Status::default()
+            };
             status.state.message = Some("This will remain unchanged.".to_string());
-            status.sensors = Some(api::Sensors {
-                people_now_present: vec![make_pnp_sensor(0)],
-                temperature: vec![],
-            });
             assert_eq!(
                 status.state.message,
                 Some("This will remain unchanged.".to_string())
@@ -92,11 +100,13 @@ mod tests {
 
         #[test]
         fn one_person_present() {
-            let mut status = api::Status::default();
-            status.sensors = Some(api::Sensors {
-                people_now_present: vec![make_pnp_sensor(1)],
-                temperature: vec![],
-            });
+            let mut status = api::Status {
+                sensors: Some(api::Sensors {
+                    people_now_present: vec![make_pnp_sensor(1)],
+                    temperature: vec![],
+                }),
+                ..api::Status::default()
+            };
             assert_eq!(status.state.message, None);
             StateFromPeopleNowPresent.modify(&mut status);
             assert_eq!(status.state.message, Some("1 person here right now".to_string()));
@@ -104,11 +114,13 @@ mod tests {
 
         #[test]
         fn two_people_present() {
-            let mut status = api::Status::default();
-            status.sensors = Some(api::Sensors {
-                people_now_present: vec![make_pnp_sensor(2)],
-                temperature: vec![],
-            });
+            let mut status = api::Status {
+                sensors: Some(api::Sensors {
+                    people_now_present: vec![make_pnp_sensor(2)],
+                    temperature: vec![],
+                }),
+                ..api::Status::default()
+            };
             assert_eq!(status.state.message, None);
             StateFromPeopleNowPresent.modify(&mut status);
             assert_eq!(status.state.message, Some("2 people here right now".to_string()));

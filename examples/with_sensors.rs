@@ -1,4 +1,3 @@
-use env_logger;
 use spaceapi_server::api;
 use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
 use spaceapi_server::modifiers::StateFromPeopleNowPresent;

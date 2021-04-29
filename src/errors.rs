@@ -14,21 +14,21 @@ quick_error! {
         /// A problem with redis occurred.
         Redis(err: RedisError) {
             from()
-            cause(err)
+            source(err)
         }
         /// A problem with the redis connection pool occurred.
         R2d2(err: R2d2Error) {
             from()
-            cause(err)
+            source(err)
         }
         /// An I/O error occurred.
         IoError(err: io::Error) {
             from()
-            cause(err)
+            source(err)
         }
         /// Another error happened.
         Message(err: Cow<'static, str>) {
-            description(&**err)
+            display("{}", err)
             from(s: &'static str) -> (s.into())
             from(s: String) -> (s.into())
         }
