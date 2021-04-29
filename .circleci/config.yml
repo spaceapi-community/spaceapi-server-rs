@@ -3,7 +3,7 @@ jobs:
 
   test:
     docker:
-      - image: rust:1.39
+      - image: rust:1.43
     steps:
       - checkout
       - restore_cache:
@@ -45,7 +45,7 @@ jobs:
             - /usr/local/cargo
   fmt:
     docker:
-      - image: rust:1.39
+      - image: rust:1.43
     steps:
       - checkout
       - restore_cache:
