@@ -3,7 +3,6 @@
 use std::sync::Arc;
 
 use quick_error::quick_error;
-use r2d2;
 use redis::Commands;
 use redis::RedisError;
 

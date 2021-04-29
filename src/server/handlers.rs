@@ -6,9 +6,6 @@ use iron::{headers, middleware, status};
 use log::{debug, error, info, warn};
 use router::Router;
 use serde::ser::{Serialize, SerializeMap, Serializer};
-use serde_json;
-
-use urlencoded;
 
 use crate::api;
 use crate::modifiers;
