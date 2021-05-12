@@ -5,7 +5,7 @@
 [![Crates.io Downloads](https://img.shields.io/crates/d/spaceapi-server.svg)](https://crates.io/crates/spaceapi-server)
 
 This is a library that allows an easy implementation of a
-[SpaceAPI](https://spaceapi.io/) v0.13 server in Rust.
+[SpaceAPI](https://spaceapi.io/) v0.13 or v14 server in Rust.
 
  * Crate Documentation: https://docs.rs/spaceapi-server/
  * Space API Reference: https://spaceapi.io/pages/docs.html
