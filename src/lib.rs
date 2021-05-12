@@ -35,12 +35,12 @@
 //! Create a `main.rs`:
 //!
 //! ```no_run
-//! use spaceapi_server::api::{Contact, Location, StatusBuilder, IssueReportChannel};
+//! use spaceapi_server::api::{Contact, Location, StatusBuilder};
 //! use spaceapi_server::SpaceapiServerBuilder;
 //!
 //! fn main() {
-//!     // Create new minimal Status instance
-//!     let status = StatusBuilder::new("coredump")
+//!     // Create new minimal v14 Status instance
+//!     let status = StatusBuilder::v14("coredump")
 //!         .logo("https://www.coredump.ch/logo.png")
 //!         .url("https://www.coredump.ch/")
 //!         .location(Location {
@@ -53,8 +53,6 @@
 //!             twitter: Some("@coredump_ch".into()),
 //!             ..Default::default()
 //!         })
-//!         .add_issue_report_channel(IssueReportChannel::Email)
-//!         .add_issue_report_channel(IssueReportChannel::Twitter)
 //!         .build()
 //!         .expect("Creating status failed");
 //!
@@ -88,11 +86,10 @@
 //!
 //! ```rust
 //! use spaceapi_server::SpaceapiServerBuilder;
-//! use spaceapi_server::api::IssueReportChannel;
 //! use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
 //!
 //! # use spaceapi_server::api;
-//! # let status = api::StatusBuilder::new("aa")
+//! # let status = api::StatusBuilder::v14("aa")
 //! #     .logo("https://example.com/logo.png")
 //! #     .url("https://example.com/")
 //! #     .location(api::Location {
@@ -104,7 +101,6 @@
 //! #         twitter: Some("@example".into()),
 //! #         ..Default::default()
 //! #     })
-//! #     .add_issue_report_channel(IssueReportChannel::Twitter)
 //! #     .build()
 //! #     .expect("Creating status failed");
 //! #

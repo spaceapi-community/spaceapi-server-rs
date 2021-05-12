@@ -22,14 +22,16 @@ impl StatusModifier for StateFromPeopleNowPresent {
             .and_then(|sensors: &api::Sensors| sensors.people_now_present.first())
             .map(|sensor: &api::PeopleNowPresentSensor| sensor.value);
         if let Some(count) = people_now_present {
-            status.state.open = Some(count > 0);
+            let mut state = status.state.clone().unwrap_or_default();
+            state.open = Some(count > 0);
             // comparison chain is actually cleaner here IMO
             #[allow(clippy::comparison_chain)]
             if count == 1 {
-                status.state.message = Some(format!("{} person here right now", count));
+                state.message = Some(format!("{} person here right now", count));
             } else if count > 1 {
-                status.state.message = Some(format!("{} people here right now", count));
+                state.message = Some(format!("{} people here right now", count));
             }
+            status.state = Some(state);
         }
     }
 }
@@ -47,10 +49,10 @@ mod tests {
                 sensors: None,
                 ..api::Status::default()
             };
-            assert_eq!(status.state.message, None);
+            assert_eq!(status.state, None);
             StateFromPeopleNowPresent.modify(&mut status);
             assert_eq!(status.sensors, None);
-            assert_eq!(status.state.message, None);
+            assert_eq!(status.state, None);
         }
 
         #[test]
@@ -62,9 +64,9 @@ mod tests {
                 }),
                 ..api::Status::default()
             };
-            assert_eq!(status.state.message, None);
+            assert_eq!(status.state, None);
             StateFromPeopleNowPresent.modify(&mut status);
-            assert_eq!(status.state.message, None);
+            assert_eq!(status.state, None);
         }
 
         fn make_pnp_sensor(value: u64) -> api::PeopleNowPresentSensor {
@@ -84,16 +86,17 @@ mod tests {
                     people_now_present: vec![make_pnp_sensor(0)],
                     temperature: vec![],
                 }),
+                state: Some(api::State::default()),
                 ..api::Status::default()
             };
-            status.state.message = Some("This will remain unchanged.".to_string());
+            status.state.as_mut().unwrap().message = Some("This will remain unchanged.".to_string());
             assert_eq!(
-                status.state.message,
+                status.state.as_ref().unwrap().message,
                 Some("This will remain unchanged.".to_string())
             );
             StateFromPeopleNowPresent.modify(&mut status);
             assert_eq!(
-                status.state.message,
+                status.state.unwrap().message,
                 Some("This will remain unchanged.".to_string())
             );
         }
@@ -107,9 +110,12 @@ mod tests {
                 }),
                 ..api::Status::default()
             };
-            assert_eq!(status.state.message, None);
+            assert_eq!(status.state, None);
             StateFromPeopleNowPresent.modify(&mut status);
-            assert_eq!(status.state.message, Some("1 person here right now".to_string()));
+            assert_eq!(
+                status.state.unwrap().message,
+                Some("1 person here right now".to_string())
+            );
         }
 
         #[test]
@@ -121,9 +127,12 @@ mod tests {
                 }),
                 ..api::Status::default()
             };
-            assert_eq!(status.state.message, None);
+            assert_eq!(status.state, None);
             StateFromPeopleNowPresent.modify(&mut status);
-            assert_eq!(status.state.message, Some("2 people here right now".to_string()));
+            assert_eq!(
+                status.state.as_ref().unwrap().message,
+                Some("2 people here right now".to_string())
+            );
         }
     }
 }

@@ -16,22 +16,15 @@ fn get_status() -> api::Status {
             lon: 8.88,
         })
         .contact(api::Contact {
-            irc: None,
-            twitter: None,
-            foursquare: None,
             email: Some("hi@example.com".into()),
-            ml: None,
-            phone: None,
-            jabber: None,
-            issue_mail: None,
-            identica: None,
-            facebook: None,
-            google: None,
-            keymasters: None,
-            sip: None,
+            ..api::Contact::default()
         })
         .add_issue_report_channel(api::IssueReportChannel::Email)
         .add_issue_report_channel(api::IssueReportChannel::Twitter)
+        .state(api::State {
+            open: Some(false),
+            ..api::State::default()
+        })
         .build()
         .unwrap()
 }
