@@ -31,7 +31,8 @@ impl StatusModifier for OpenStatusFromRedisModifier {
         if let Some(state) = &mut status.state {
             state.open = match redis_state {
                 Ok(v) => Some(v == "open"),
-                Err(_) => None,
+                // v0.13 doesn't allow to remove the state.open field, so we just default to false
+                Err(_) => Some(false),
             };
             state.lastchange = conn.get("state_lastchange").ok();
             state.trigger_person = conn.get("state_triggerperson").ok();
@@ -42,7 +43,7 @@ impl StatusModifier for OpenStatusFromRedisModifier {
 fn main() {
     env_logger::init();
 
-    let status = api::StatusBuilder::new("Mittelab")
+    let status = api::StatusBuilder::mixed("Mittelab")
         .logo("https://www.mittelab.org/images/logo.svg")
         .url("https://www.mittelab.org")
         .location(api::Location {
@@ -63,6 +64,10 @@ fn main() {
         .add_project("https://git.mittelab.org")
         .add_project("https://github.com/mittelab")
         .add_project("https://wiki.mittelab.org/progetti/")
+        .state(api::State {
+            open: Some(false),
+            ..api::State::default()
+        })
         .build()
         .expect("Creating status failed");
 
