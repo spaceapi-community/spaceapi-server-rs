@@ -18,10 +18,7 @@ fn main() {
         })
         .add_issue_report_channel(api::IssueReportChannel::Email)
         .add_issue_report_channel(api::IssueReportChannel::Twitter)
-        .state(api::State {
-            open: Some(false),
-            ..api::State::default()
-        })
+        .state(api::State::default())
         .build()
         .expect("Creating status failed");
 
