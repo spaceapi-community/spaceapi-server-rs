@@ -11,11 +11,12 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### Unreleased
+### v0.6.0  (2021-08-30)
 
 - [changed] Update redis to 0.20 and r2d2\_redis to 0.14 (#105, #106)
 - [changed] Update quick-error to 2.0 (#106)
-- [changed] Update spaceapi to 0.8 to support SpaceAPI v14 (#107)
+- [changed] Update spaceapi to 0.8 to support SpaceAPI v14. See the [spaceapi
+  changelog] for more details. (#107)
 
 ### v0.5.0 (2020-04-21)
 
