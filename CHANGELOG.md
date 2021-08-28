@@ -15,6 +15,7 @@ Possible log types:
 
 - [changed] Update redis to 0.20 and r2d2\_redis to 0.14 (#105, #106)
 - [changed] Update quick-error to 2.0 (#106)
+- [changed] Update spaceapi to 0.8 to support SpaceAPI v14 (#107)
 
 ### v0.5.0 (2020-04-21)
 

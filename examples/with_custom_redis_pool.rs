@@ -27,20 +27,22 @@ impl OpenStatusFromRedisModifier {
 impl StatusModifier for OpenStatusFromRedisModifier {
     fn modify(&self, status: &mut api::Status) {
         let mut conn = self.pool.get().unwrap();
-        let state: RedisResult<String> = conn.get("state_open");
-        status.state.open = match state {
-            Ok(v) => Some(v == "open"),
-            Err(_) => None,
-        };
-        status.state.lastchange = conn.get("state_lastchange").ok();
-        status.state.trigger_person = conn.get("state_triggerperson").ok();
+        let redis_state: RedisResult<String> = conn.get("state_open");
+        if let Some(state) = &mut status.state {
+            state.open = match redis_state {
+                Ok(v) => Some(v == "open"),
+                Err(_) => None,
+            };
+            state.lastchange = conn.get("state_lastchange").ok();
+            state.trigger_person = conn.get("state_triggerperson").ok();
+        }
     }
 }
 
 fn main() {
     env_logger::init();
 
-    let status = api::StatusBuilder::new("Mittelab")
+    let status = api::StatusBuilder::mixed("Mittelab")
         .logo("https://www.mittelab.org/images/logo.svg")
         .url("https://www.mittelab.org")
         .location(api::Location {
@@ -61,6 +63,7 @@ fn main() {
         .add_project("https://git.mittelab.org")
         .add_project("https://github.com/mittelab")
         .add_project("https://wiki.mittelab.org/progetti/")
+        .state(api::State::default())
         .build()
         .expect("Creating status failed");
 

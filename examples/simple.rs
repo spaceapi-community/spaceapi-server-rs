@@ -2,8 +2,8 @@ use spaceapi_server::api;
 use spaceapi_server::SpaceapiServerBuilder;
 
 fn main() {
-    // Create new minimal Status instance
-    let status = api::StatusBuilder::new("coredump")
+    // Create new minimal Status instance compatible with v0.13 and v14
+    let status = api::StatusBuilder::mixed("coredump")
         .logo("https://www.coredump.ch/logo.png")
         .url("https://www.coredump.ch/")
         .location(api::Location {
@@ -18,6 +18,7 @@ fn main() {
         })
         .add_issue_report_channel(api::IssueReportChannel::Email)
         .add_issue_report_channel(api::IssueReportChannel::Twitter)
+        .state(api::State::default())
         .build()
         .expect("Creating status failed");
 

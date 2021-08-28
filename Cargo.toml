@@ -33,7 +33,7 @@ urlencoded = "^0.6"
 router = "^0.6"
 serde = "^1.0"
 serde_json = "^1.0"
-spaceapi = "^0.7.0"
+spaceapi = "^0.8.1"
 quick-error = "2.0"
 
 
