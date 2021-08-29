@@ -1,6 +1,5 @@
 extern crate env_logger;
 extern crate r2d2;
-extern crate r2d2_redis;
 extern crate redis;
 extern crate spaceapi_server;
 
@@ -9,10 +8,9 @@ use spaceapi_server::modifiers::StatusModifier;
 use spaceapi_server::SpaceapiServerBuilder;
 
 use r2d2::Pool;
-use r2d2_redis::RedisConnectionManager;
 use redis::{Commands, RedisResult};
 
-type RedisPool = Pool<RedisConnectionManager>;
+type RedisPool = Pool<redis::Client>;
 
 struct OpenStatusFromRedisModifier {
     pool: RedisPool,
@@ -67,8 +65,15 @@ fn main() {
         .build()
         .expect("Creating status failed");
 
-    let manager = r2d2_redis::RedisConnectionManager::new("redis://localhost").unwrap();
-    let pool = r2d2::Pool::builder().build(manager).unwrap();
+    // get redis client
+    let client: redis::Client = redis::Client::open("redis://127.0.0.1/")
+        .unwrap_or_else(|e| panic!("Error connecting to redis: {}", e));
+
+    // create r2d2 pool
+    let pool: r2d2::Pool<redis::Client> = r2d2::Pool::builder()
+        .max_size(15)
+        .build(client)
+        .unwrap_or_else(|e| panic!("Error building redis pool: {}", e));
 
     // Set up server
     let server = SpaceapiServerBuilder::new(status)
