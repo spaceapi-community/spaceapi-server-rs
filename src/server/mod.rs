@@ -6,7 +6,6 @@ use std::time::Duration;
 
 use iron::Iron;
 use log::debug;
-use r2d2_redis::RedisConnectionManager;
 use redis::{ConnectionInfo, IntoConnectionInfo};
 use router::Router;
 
@@ -24,7 +23,7 @@ use crate::types::RedisPool;
 
 enum RedisInfo {
     None,
-    Pool(r2d2::Pool<r2d2_redis::RedisConnectionManager>),
+    Pool(r2d2::Pool<redis::Client>),
     ConnectionInfo(ConnectionInfo),
     Err(SpaceapiServerError),
 }
@@ -86,7 +85,7 @@ impl SpaceapiServerBuilder {
     /// See
     /// [`examples/with_custom_redis_pool.rs`](https://github.com/spaceapi-community/spaceapi-server-rs/blob/master/examples/with_custom_redis_pool.rs)
     /// for a real example.
-    pub fn redis_pool(mut self, redis_pool: r2d2::Pool<r2d2_redis::RedisConnectionManager>) -> Self {
+    pub fn redis_pool(mut self, redis_pool: r2d2::Pool<redis::Client>) -> Self {
         self.redis_info = RedisInfo::Pool(redis_pool);
         self
     }
@@ -125,12 +124,11 @@ impl SpaceapiServerBuilder {
             RedisInfo::Pool(p) => Ok(p),
             RedisInfo::ConnectionInfo(ci) => {
                 // Log some useful debug information
-                debug!("Connecting to redis database {} at {:?}", ci.db, ci.addr);
+                debug!("Connecting to redis database {} at {:?}", ci.redis.db, ci.addr);
 
-                let redis_manager = RedisConnectionManager::new(ci)?;
+                let client: redis::Client = redis::Client::open(ci)?;
 
-                // Create redis pool
-                let redis_pool = r2d2::Pool::builder()
+                let redis_pool: r2d2::Pool<redis::Client> = r2d2::Pool::builder()
                     // Provide up to 6 connections in connection pool
                     .max_size(6)
                     // At least 1 connection must be active
@@ -143,7 +141,7 @@ impl SpaceapiServerBuilder {
                     .error_handler(Box::new(r2d2::NopErrorHandler))
                     // Initialize connection pool lazily. This allows the SpaceAPI
                     // server to work even without a database connection.
-                    .build_unchecked(redis_manager);
+                    .build_unchecked(client);
                 Ok(redis_pool)
             }
         };

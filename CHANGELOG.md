@@ -11,6 +11,10 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### Unreleased
+
+- [changed] Update redis to 0.21 and remove r2d2\_redis (#110)
+
 ### v0.6.0  (2021-08-30)
 
 - [changed] Update redis to 0.20 and r2d2\_redis to 0.14 (#105, #106)
