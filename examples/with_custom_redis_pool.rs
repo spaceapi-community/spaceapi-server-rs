@@ -1,8 +1,3 @@
-extern crate env_logger;
-extern crate r2d2;
-extern crate redis;
-extern crate spaceapi_server;
-
 use spaceapi_server::api;
 use spaceapi_server::modifiers::StatusModifier;
 use spaceapi_server::SpaceapiServerBuilder;
