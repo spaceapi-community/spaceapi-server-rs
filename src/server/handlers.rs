@@ -197,7 +197,7 @@ impl middleware::Handler for UpdateHandler {
         {
             let params = req.get_ref::<urlencoded::UrlEncodedBody>().unwrap();
             sensor_value = match params.get("value") {
-                Some(ref values) => match values.len() {
+                Some(values) => match values.len() {
                     1 => values[0].to_string(),
                     _ => return Ok(self.err_response(status::BadRequest, "Too many values specified")),
                 },
