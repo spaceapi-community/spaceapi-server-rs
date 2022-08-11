@@ -1,7 +1,8 @@
 use spaceapi_server::api;
 use spaceapi_server::SpaceapiServerBuilder;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // Create new minimal Status instance compatible with v0.13 and v14
     let status = api::StatusBuilder::mixed("coredump")
         .logo("https://www.coredump.ch/logo.png")
@@ -29,5 +30,8 @@ fn main() {
         .unwrap();
 
     // Serve!
-    let _ = server.serve("127.0.0.1:8000");
+    let _ = server
+        .serve("127.0.0.1:8000")
+        .await
+        .expect("Could not start the server");
 }

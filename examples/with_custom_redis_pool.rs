@@ -32,7 +32,8 @@ impl StatusModifier for OpenStatusFromRedisModifier {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     env_logger::init();
 
     let status = api::StatusBuilder::mixed("Mittelab")
@@ -81,5 +82,6 @@ fn main() {
     // Serve!
     server
         .serve("127.0.0.1:8000")
+        .await
         .expect("Could not start the server");
 }
