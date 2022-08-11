@@ -188,15 +188,14 @@
 
 pub use spaceapi as api;
 
-pub use iron::error::HttpResult;
-pub use iron::Listening;
+//pub use iron::error::HttpResult;
+//pub use iron::Listening;
 
 mod errors;
 pub mod modifiers;
 mod sensors;
 mod server;
 mod types;
-
 pub use crate::errors::SpaceapiServerError;
 pub use crate::server::SpaceapiServer;
 pub use crate::server::SpaceapiServerBuilder;
