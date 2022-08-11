@@ -1,10 +1,10 @@
 //! Handlers for the server.
 
-use iron::modifiers::Header;
-use iron::prelude::*;
-use iron::{headers, middleware, status};
+// use iron::modifiers::Header;
+// use iron::prelude::*;
+// use iron::{headers, middleware, status};
 use log::{debug, error, info, warn};
-use router::Router;
+// use router::Router;
 use serde::ser::{Serialize, SerializeMap, Serializer};
 
 use crate::api;
@@ -98,6 +98,7 @@ impl ReadHandler {
     }
 }
 
+/*
 impl middleware::Handler for ReadHandler {
     /// Return the current status JSON.
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -120,6 +121,7 @@ impl middleware::Handler for ReadHandler {
         Ok(response)
     }
 }
+*/
 
 pub(crate) struct UpdateHandler {
     redis_pool: RedisPool,
@@ -147,6 +149,7 @@ impl UpdateHandler {
         sensor_spec.set_sensor_value(&self.redis_pool, value)
     }
 
+    /*
     /// Build an OK response with the `HTTP 204 No Content` status code.
     fn ok_response(&self) -> Response {
         Response::with(status::NoContent)
@@ -176,8 +179,10 @@ impl UpdateHandler {
             ])))
             .set(Header(headers::AccessControlAllowOrigin::Any))
     }
+    */
 }
 
+/*
 impl middleware::Handler for UpdateHandler {
     /// Update the sensor, return correct status code.
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -226,6 +231,7 @@ impl middleware::Handler for UpdateHandler {
         Ok(self.ok_response())
     }
 }
+*/
 
 #[cfg(test)]
 mod tests {
