@@ -1,16 +1,20 @@
 //! Handlers for the server.
 
+use std::convert::Infallible;
 // use iron::modifiers::Header;
 // use iron::prelude::*;
 // use iron::{headers, middleware, status};
 use log::{debug, error, info, warn};
+use hyper::{Body, Request, Response, Server, StatusCode};
+use routerify::prelude::*;
 // use router::Router;
 use serde::ser::{Serialize, SerializeMap, Serializer};
 
 use crate::api;
-use crate::modifiers;
+//use crate::modifiers;
 use crate::sensors;
 use crate::types::RedisPool;
+use crate::server::SpaceapiServer;
 
 #[derive(Debug)]
 struct ErrorResponse {
@@ -29,73 +33,51 @@ impl Serialize for ErrorResponse {
     }
 }
 
-pub(crate) struct ReadHandler {
-    status: api::Status,
-    redis_pool: RedisPool,
-    sensor_specs: sensors::SafeSensorSpecs,
-    status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
-}
+pub async fn json_response_handler(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    // Create a mutable copy of the status struct
+    let state = req.data::<SpaceapiServer>().unwrap();
+    let mut status_copy = state.status.clone();
 
-impl ReadHandler {
-    pub(crate) fn new(
-        status: api::Status,
-        redis_pool: RedisPool,
-        sensor_specs: sensors::SafeSensorSpecs,
-        status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
-    ) -> ReadHandler {
-        ReadHandler {
-            status,
-            redis_pool,
-            sensor_specs,
-            status_modifiers,
-        }
-    }
-
-    fn build_response_json(&self) -> String {
-        // Create a mutable copy of the status struct
-        let mut status_copy = self.status.clone();
-
-        // Process registered sensors
-        for sensor_spec in self.sensor_specs.iter() {
-            match sensor_spec.get_sensor_value(&self.redis_pool) {
-                // Value could be read successfullly
-                Ok(value) => {
-                    if status_copy.sensors.is_none() {
-                        status_copy.sensors = Some(api::Sensors {
-                            people_now_present: vec![],
-                            temperature: vec![],
-                        });
-                    }
-                    sensor_spec
-                        .template
-                        .to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
+    // Process registered sensors
+    for sensor_spec in state.sensor_specs.iter() {
+        match sensor_spec.get_sensor_value(&state.redis_pool) {
+            // Value could be read successfullly
+            Ok(value) => {
+                if status_copy.sensors.is_none() {
+                    status_copy.sensors = Some(api::Sensors {
+                        people_now_present: vec![],
+                        temperature: vec![],
+                    });
                 }
+                sensor_spec
+                    .template
+                    .to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
+            }
 
-                // Value could not be read, do error logging
-                Err(err) => {
-                    warn!(
-                        "Could not retrieve key '{}' from Redis, omiting the sensor",
-                        &sensor_spec.data_key
+            // Value could not be read, do error logging
+            Err(err) => {
+                warn!(
+                    "Could not retrieve key '{}' from Redis, omiting the sensor",
+                    &sensor_spec.data_key
                     );
-                    match err {
-                        sensors::SensorError::Redis(e) => debug!("Error: {:?}", e),
-                        sensors::SensorError::R2d2(e) => debug!("Error: {:?}", e),
-                        sensors::SensorError::UnknownSensor(e) => warn!("Error: {:?}", e),
-                    }
+                match err {
+                    sensors::SensorError::Redis(e) => debug!("Error: {:?}", e),
+                    sensors::SensorError::R2d2(e) => debug!("Error: {:?}", e),
+                    sensors::SensorError::UnknownSensor(e) => warn!("Error: {:?}", e),
                 }
             }
         }
-
-        for status_modifier in &self.status_modifiers {
-            status_modifier.modify(&mut status_copy);
-        }
-
-        // Serialize to JSON
-        serde_json::to_string(&status_copy).expect(
-            "Status object could not be serialized to JSON. \
-             Please open an issue at https://github.com/spaceapi-community/spaceapi-server-rs/issues",
-        )
     }
+
+    for status_modifier in &state.status_modifiers {
+        status_modifier.modify(&mut status_copy);
+    }
+
+    // Serialize to JSON
+    Ok(Response::new(Body::from(serde_json::to_string(&status_copy).expect(
+        "Status object could not be serialized to JSON. \
+             Please open an issue at https://github.com/spaceapi-community/spaceapi-server-rs/issues",
+             ))))
 }
 
 /*

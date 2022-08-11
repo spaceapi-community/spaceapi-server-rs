@@ -1,15 +1,15 @@
 //! The SpaceAPI server struct.
 
+use std::convert::Infallible;
+use std::error::Error;
 use std::net::ToSocketAddrs;
 use std::sync::Arc;
 use std::time::Duration;
-use std::convert::Infallible;
-use std::error::Error;
 
 // use iron::Iron;
+use hyper::{Body, Request, Response, Server};
 use log::debug;
 use redis::{ConnectionInfo, IntoConnectionInfo};
-use hyper::{Body, Request, Response, Server};
 use routerify::{Router, RouterService};
 
 use serde_json::map::Map;
@@ -176,18 +176,11 @@ impl SpaceapiServer {
     /// Create and return a Router instance.
     fn route(self) -> Router<Body, Infallible> {
         Router::builder()
-            /*
-            .get( "/", handlers::ReadHandler::new(
-                    self.status.clone(),
-                    self.redis_pool.clone(),
-                    self.sensor_specs.clone(),
-                    self.status_modifiers,
-                    )
-                )
-                */
+            .data(self)
+            .get("/", handlers::json_response_handler)
             .build()
             .unwrap()
-            /*
+        /*
         .put(
             "/sensors/:sensor/",
             handlers::UpdateHandler::new(self.redis_pool.clone(), self.sensor_specs),
