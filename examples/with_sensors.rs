@@ -3,7 +3,8 @@ use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureS
 use spaceapi_server::modifiers::StateFromPeopleNowPresent;
 use spaceapi_server::SpaceapiServerBuilder;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     env_logger::init();
 
     // Create new minimal Status instance compatible with v0.13 and v14
@@ -63,5 +64,6 @@ fn main() {
     // Serve!
     server
         .serve("127.0.0.1:8000")
+        .await
         .expect("Could not start the server");
 }
