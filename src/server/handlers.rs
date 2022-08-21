@@ -1,11 +1,12 @@
 //! Handlers for the server.
 
+use hyper::header::{ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_TYPE};
 use std::convert::Infallible;
 // use iron::modifiers::Header;
 // use iron::prelude::*;
 // use iron::{headers, middleware, status};
-use log::{debug, error, info, warn};
 use hyper::{Body, Request, Response, Server, StatusCode};
+use log::{debug, error, info, warn};
 use routerify::prelude::*;
 // use router::Router;
 use serde::ser::{Serialize, SerializeMap, Serializer};
@@ -13,8 +14,8 @@ use serde::ser::{Serialize, SerializeMap, Serializer};
 use crate::api;
 //use crate::modifiers;
 use crate::sensors;
-use crate::types::RedisPool;
 use crate::server::SpaceapiServer;
+use crate::types::RedisPool;
 
 #[derive(Debug)]
 struct ErrorResponse {
@@ -59,7 +60,7 @@ pub async fn json_response_handler(req: Request<Body>) -> Result<Response<Body>,
                 warn!(
                     "Could not retrieve key '{}' from Redis, omiting the sensor",
                     &sensor_spec.data_key
-                    );
+                );
                 match err {
                     sensors::SensorError::Redis(e) => debug!("Error: {:?}", e),
                     sensors::SensorError::R2d2(e) => debug!("Error: {:?}", e),
@@ -74,36 +75,17 @@ pub async fn json_response_handler(req: Request<Body>) -> Result<Response<Body>,
     }
 
     // Serialize to JSON
-    Ok(Response::new(Body::from(serde_json::to_string(&status_copy).expect(
-        "Status object could not be serialized to JSON. \
-             Please open an issue at https://github.com/spaceapi-community/spaceapi-server-rs/issues",
-             ))))
+    let response = Response::builder()
+        .status(StatusCode::OK)
+        .header(CONTENT_TYPE, "application/json; charset=utf-8")
+        .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .body(Body::from(serde_json::to_string(&status_copy).expect(
+            "Status object could not be serialized to JSON. \
+         Please open an issue at https://github.com/spaceapi-community/spaceapi-server-rs/issues",
+        )))
+        .unwrap();
+    Ok(response)
 }
-
-/*
-impl middleware::Handler for ReadHandler {
-    /// Return the current status JSON.
-    fn handle(&self, req: &mut Request) -> IronResult<Response> {
-        info!("{} /{} from {}", req.method, req.url.path()[0], req.remote_addr);
-
-        // Get response body
-        let body = self.build_response_json();
-
-        // Create response
-        let response = Response::with((status::Ok, body))
-            // Set headers
-            .set(Header(headers::ContentType(
-                "application/json; charset=utf-8".parse().unwrap(),
-            )))
-            .set(Header(headers::CacheControl(vec![
-                headers::CacheDirective::NoCache,
-            ])))
-            .set(Header(headers::AccessControlAllowOrigin::Any));
-
-        Ok(response)
-    }
-}
-*/
 
 pub(crate) struct UpdateHandler {
     redis_pool: RedisPool,
