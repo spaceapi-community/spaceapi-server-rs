@@ -47,6 +47,7 @@
 //!             address: Some("Spinnereistrasse 2, 8640 Rapperswil, Switzerland".into()),
 //!             lat: 47.22936,
 //!             lon: 8.82949,
+//!             timezone: None,
 //!         })
 //!         .contact(Contact {
 //!             irc: Some("irc://freenode.net/#coredump".into()),
@@ -86,7 +87,9 @@
 //!
 //! ```rust
 //! use spaceapi_server::SpaceapiServerBuilder;
-//! use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
+//! use spaceapi_server::api::sensors::{
+//!    PeopleNowPresentSensorTemplate, SensorMetadata, SensorMetadataWithLocation, TemperatureSensorTemplate,
+//! };
 //!
 //! # use spaceapi_server::api;
 //! # let status = api::StatusBuilder::v14("aa")
@@ -96,6 +99,7 @@
 //! #         address: Some("addr".into()),
 //! #         lat: 47.0,
 //! #         lon: 8.0,
+//! #         timezone: None,
 //! #     })
 //! #     .contact(api::Contact {
 //! #         twitter: Some("@example".into()),
@@ -107,22 +111,25 @@
 //! let server = SpaceapiServerBuilder::new(status)
 //!     .redis_connection_info("redis://127.0.0.1/")
 //!     .add_sensor(PeopleNowPresentSensorTemplate {
-//!         location: Some("Hackerspace".into()),
-//!         name: None,
-//!         description: None,
+//!         metadata: SensorMetadata {
+//!             location: Some("Hackerspace".into()),
+//!             ..Default::default()
+//!         },
 //!         names: None,
 //!     }, "people_now_present".into())
 //!     .add_sensor(TemperatureSensorTemplate {
+//!         metadata: SensorMetadataWithLocation {
+//!             location: "Room 1".into(),
+//!             ..Default::default()
+//!         },
 //!         unit: "°C".into(),
-//!         location: "Room 1".into(),
-//!         name: None,
-//!         description: None,
 //!     }, "temp_room1".into())
 //!     .add_sensor(TemperatureSensorTemplate {
+//!         metadata: SensorMetadataWithLocation {
+//!             location: "Room 2".into(),
+//!             ..Default::default()
+//!         },
 //!         unit: "°C".into(),
-//!         location: "Room 2".into(),
-//!         name: None,
-//!         description: None,
 //!     }, "temp_room2".into())
 //!     .build()
 //! .expect("Could not initialize server");

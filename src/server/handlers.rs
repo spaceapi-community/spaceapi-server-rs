@@ -61,10 +61,7 @@ impl ReadHandler {
                 // Value could be read successfullly
                 Ok(value) => {
                     if status_copy.sensors.is_none() {
-                        status_copy.sensors = Some(api::Sensors {
-                            people_now_present: vec![],
-                            temperature: vec![],
-                        });
+                        status_copy.sensors = Some(api::Sensors::default());
                     }
                     sensor_spec
                         .template

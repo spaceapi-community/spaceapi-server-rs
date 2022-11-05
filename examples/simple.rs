@@ -10,6 +10,7 @@ fn main() {
             address: Some("Spinnereistrasse 2, 8640 Rapperswil, Switzerland".into()),
             lat: 47.22936,
             lon: 8.82949,
+            timezone: None,
         })
         .contact(api::Contact {
             irc: Some("irc://freenode.net/#coredump".into()),

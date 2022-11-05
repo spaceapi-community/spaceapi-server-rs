@@ -14,6 +14,7 @@ fn get_status() -> api::Status {
             address: Some("Street 1, Zürich, Switzerland".into()),
             lat: 47.123,
             lon: 8.88,
+            timezone: None,
         })
         .contact(api::Contact {
             email: Some("hi@example.com".into()),

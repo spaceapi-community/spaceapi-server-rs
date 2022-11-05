@@ -58,10 +58,7 @@ mod tests {
         #[test]
         fn no_people_present_sensor() {
             let mut status = api::Status {
-                sensors: Some(api::Sensors {
-                    people_now_present: vec![],
-                    temperature: vec![],
-                }),
+                sensors: Some(api::Sensors::default()),
                 ..api::Status::default()
             };
             assert_eq!(status.state, None);
@@ -71,10 +68,8 @@ mod tests {
 
         fn make_pnp_sensor(value: u64) -> api::PeopleNowPresentSensor {
             api::PeopleNowPresentSensor {
-                location: None,
-                name: None,
+                metadata: Default::default(),
                 names: None,
-                description: None,
                 value,
             }
         }
@@ -84,7 +79,7 @@ mod tests {
             let mut status = api::Status {
                 sensors: Some(api::Sensors {
                     people_now_present: vec![make_pnp_sensor(0)],
-                    temperature: vec![],
+                    ..api::Sensors::default()
                 }),
                 state: Some(api::State::default()),
                 ..api::Status::default()
@@ -106,7 +101,7 @@ mod tests {
             let mut status = api::Status {
                 sensors: Some(api::Sensors {
                     people_now_present: vec![make_pnp_sensor(1)],
-                    temperature: vec![],
+                    ..api::Sensors::default()
                 }),
                 ..api::Status::default()
             };
@@ -123,7 +118,7 @@ mod tests {
             let mut status = api::Status {
                 sensors: Some(api::Sensors {
                     people_now_present: vec![make_pnp_sensor(2)],
-                    temperature: vec![],
+                    ..api::Sensors::default()
                 }),
                 ..api::Status::default()
             };
