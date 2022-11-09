@@ -3,7 +3,7 @@ jobs:
 
   test:
     docker:
-      - image: rust:1.49
+      - image: rust:1.51
     steps:
       - checkout
       - restore_cache:
@@ -57,24 +57,6 @@ jobs:
           key: v1-cargo-lint-cache
           paths:
             - /usr/local/cargo
-  audit:
-    docker:
-      - image: rust:latest
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-cargo-audit-cache
-      - run:
-          name: Install cargo-audit
-          command: cargo install --force cargo-audit
-      - run:
-          name: Run cargo-audit
-          command: cargo update && cargo audit
-      - save_cache:
-          key: v1-cargo-audit-cache
-          paths:
-            - /usr/local/cargo
 
 workflows:
   version: 2
@@ -85,7 +67,6 @@ workflows:
       - test
       - lint
       - fmt
-      - audit
 
   # Build master every week on Monday at 04:00 am
   weekly:
@@ -99,4 +80,3 @@ workflows:
     jobs:
       - test
       - lint
-      - audit
