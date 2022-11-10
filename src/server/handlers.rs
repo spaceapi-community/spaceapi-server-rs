@@ -1,15 +1,20 @@
 //! Handlers for the server.
 
-use iron::modifiers::Header;
-use iron::prelude::*;
-use iron::{headers, middleware, status};
+use hyper::header::{ACCESS_CONTROL_ALLOW_ORIGIN, CONTENT_TYPE};
+use std::convert::Infallible;
+// use iron::modifiers::Header;
+// use iron::prelude::*;
+// use iron::{headers, middleware, status};
+use hyper::{Body, Request, Response, Server, StatusCode};
 use log::{debug, error, info, warn};
-use router::Router;
+use routerify::prelude::*;
+// use router::Router;
 use serde::ser::{Serialize, SerializeMap, Serializer};
 
 use crate::api;
-use crate::modifiers;
+//use crate::modifiers;
 use crate::sensors;
+use crate::server::SpaceapiServer;
 use crate::types::RedisPool;
 
 #[derive(Debug)]
@@ -29,96 +34,57 @@ impl Serialize for ErrorResponse {
     }
 }
 
-pub(crate) struct ReadHandler {
-    status: api::Status,
-    redis_pool: RedisPool,
-    sensor_specs: sensors::SafeSensorSpecs,
-    status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
-}
+pub async fn json_response_handler(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    // Create a mutable copy of the status struct
+    let state = req.data::<SpaceapiServer>().unwrap();
+    let mut status_copy = state.status.clone();
 
-impl ReadHandler {
-    pub(crate) fn new(
-        status: api::Status,
-        redis_pool: RedisPool,
-        sensor_specs: sensors::SafeSensorSpecs,
-        status_modifiers: Vec<Box<dyn modifiers::StatusModifier>>,
-    ) -> ReadHandler {
-        ReadHandler {
-            status,
-            redis_pool,
-            sensor_specs,
-            status_modifiers,
-        }
-    }
-
-    fn build_response_json(&self) -> String {
-        // Create a mutable copy of the status struct
-        let mut status_copy = self.status.clone();
-
-        // Process registered sensors
-        for sensor_spec in self.sensor_specs.iter() {
-            match sensor_spec.get_sensor_value(&self.redis_pool) {
-                // Value could be read successfullly
-                Ok(value) => {
-                    if status_copy.sensors.is_none() {
-                        status_copy.sensors = Some(api::Sensors {
-                            people_now_present: vec![],
-                            temperature: vec![],
-                        });
-                    }
-                    sensor_spec
-                        .template
-                        .to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
+    // Process registered sensors
+    for sensor_spec in state.sensor_specs.iter() {
+        match sensor_spec.get_sensor_value(&state.redis_pool) {
+            // Value could be read successfullly
+            Ok(value) => {
+                if status_copy.sensors.is_none() {
+                    status_copy.sensors = Some(api::Sensors {
+                        people_now_present: vec![],
+                        temperature: vec![],
+                    });
                 }
+                sensor_spec
+                    .template
+                    .to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
+            }
 
-                // Value could not be read, do error logging
-                Err(err) => {
-                    warn!(
-                        "Could not retrieve key '{}' from Redis, omiting the sensor",
-                        &sensor_spec.data_key
-                    );
-                    match err {
-                        sensors::SensorError::Redis(e) => debug!("Error: {:?}", e),
-                        sensors::SensorError::R2d2(e) => debug!("Error: {:?}", e),
-                        sensors::SensorError::UnknownSensor(e) => warn!("Error: {:?}", e),
-                    }
+            // Value could not be read, do error logging
+            Err(err) => {
+                warn!(
+                    "Could not retrieve key '{}' from Redis, omiting the sensor",
+                    &sensor_spec.data_key
+                );
+                match err {
+                    sensors::SensorError::Redis(e) => debug!("Error: {:?}", e),
+                    sensors::SensorError::R2d2(e) => debug!("Error: {:?}", e),
+                    sensors::SensorError::UnknownSensor(e) => warn!("Error: {:?}", e),
                 }
             }
         }
+    }
 
-        for status_modifier in &self.status_modifiers {
-            status_modifier.modify(&mut status_copy);
-        }
+    for status_modifier in &state.status_modifiers {
+        status_modifier.modify(&mut status_copy);
+    }
 
-        // Serialize to JSON
-        serde_json::to_string(&status_copy).expect(
+    // Serialize to JSON
+    let response = Response::builder()
+        .status(StatusCode::OK)
+        .header(CONTENT_TYPE, "application/json; charset=utf-8")
+        .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .body(Body::from(serde_json::to_string(&status_copy).expect(
             "Status object could not be serialized to JSON. \
-             Please open an issue at https://github.com/spaceapi-community/spaceapi-server-rs/issues",
-        )
-    }
-}
-
-impl middleware::Handler for ReadHandler {
-    /// Return the current status JSON.
-    fn handle(&self, req: &mut Request) -> IronResult<Response> {
-        info!("{} /{} from {}", req.method, req.url.path()[0], req.remote_addr);
-
-        // Get response body
-        let body = self.build_response_json();
-
-        // Create response
-        let response = Response::with((status::Ok, body))
-            // Set headers
-            .set(Header(headers::ContentType(
-                "application/json; charset=utf-8".parse().unwrap(),
-            )))
-            .set(Header(headers::CacheControl(vec![
-                headers::CacheDirective::NoCache,
-            ])))
-            .set(Header(headers::AccessControlAllowOrigin::Any));
-
-        Ok(response)
-    }
+         Please open an issue at https://github.com/spaceapi-community/spaceapi-server-rs/issues",
+        )))
+        .unwrap();
+    Ok(response)
 }
 
 pub(crate) struct UpdateHandler {
@@ -147,6 +113,7 @@ impl UpdateHandler {
         sensor_spec.set_sensor_value(&self.redis_pool, value)
     }
 
+    /*
     /// Build an OK response with the `HTTP 204 No Content` status code.
     fn ok_response(&self) -> Response {
         Response::with(status::NoContent)
@@ -176,8 +143,10 @@ impl UpdateHandler {
             ])))
             .set(Header(headers::AccessControlAllowOrigin::Any))
     }
+    */
 }
 
+/*
 impl middleware::Handler for UpdateHandler {
     /// Update the sensor, return correct status code.
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -226,6 +195,7 @@ impl middleware::Handler for UpdateHandler {
         Ok(self.ok_response())
     }
 }
+*/
 
 #[cfg(test)]
 mod tests {

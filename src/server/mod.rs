@@ -1,13 +1,16 @@
 //! The SpaceAPI server struct.
 
+use std::convert::Infallible;
+use std::error::Error;
 use std::net::ToSocketAddrs;
 use std::sync::Arc;
 use std::time::Duration;
 
-use iron::Iron;
+// use iron::Iron;
+use hyper::{Body, Request, Response, Server};
 use log::debug;
 use redis::{ConnectionInfo, IntoConnectionInfo};
-use router::Router;
+use routerify::{Router, RouterService};
 
 use serde_json::map::Map;
 use serde_json::Value;
@@ -171,27 +174,19 @@ pub struct SpaceapiServer {
 
 impl SpaceapiServer {
     /// Create and return a Router instance.
-    fn route(self) -> Router {
-        let mut router = Router::new();
-
-        router.get(
-            "/",
-            handlers::ReadHandler::new(
-                self.status.clone(),
-                self.redis_pool.clone(),
-                self.sensor_specs.clone(),
-                self.status_modifiers,
-            ),
-            "root",
-        );
-
-        router.put(
+    fn route(self) -> Router<Body, Infallible> {
+        Router::builder()
+            .data(self)
+            .get("/", handlers::json_response_handler)
+            .build()
+            .unwrap()
+        /*
+        .put(
             "/sensors/:sensor/",
             handlers::UpdateHandler::new(self.redis_pool.clone(), self.sensor_specs),
             "sensors",
-        );
-
-        router
+        )
+        */
     }
 
     /// Start a HTTP server listening on ``self.host:self.port``.
@@ -199,13 +194,16 @@ impl SpaceapiServer {
     /// The call returns an `HttpResult<Listening>` object, see
     /// http://ironframework.io/doc/hyper/server/struct.Listening.html
     /// for more information.
-    pub fn serve<S: ToSocketAddrs>(self, socket_addr: S) -> crate::HttpResult<crate::Listening> {
+    pub async fn serve<S: ToSocketAddrs>(self, socket_addr: S) -> Result<(), Box<dyn Error>> {
         // Launch server process
         let router = self.route();
         println!("Starting HTTP server on:");
         for a in socket_addr.to_socket_addrs()? {
             println!("\thttp://{}", a);
         }
-        Iron::new(router).http(socket_addr)
+        let service = RouterService::new(router).unwrap();
+
+        let server = Server::bind(&socket_addr.to_socket_addrs().unwrap().next().unwrap()).serve(service);
+        Ok(server.await?)
     }
 }
