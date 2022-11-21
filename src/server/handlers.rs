@@ -61,7 +61,7 @@ impl ReadHandler {
                 // Value could be read successfullly
                 Ok(value) => {
                     if status_copy.sensors.is_none() {
-                        status_copy.sensors = Some(api::Sensors::default());
+                        status_copy.sensors = Some(api::sensors::Sensors::default());
                     }
                     sensor_spec
                         .template

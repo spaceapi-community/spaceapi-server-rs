@@ -115,7 +115,6 @@
 //!             location: Some("Hackerspace".into()),
 //!             ..Default::default()
 //!         },
-//!         names: None,
 //!     }, "people_now_present".into())
 //!     .add_sensor(TemperatureSensorTemplate {
 //!         metadata: SensorMetadataWithLocation {
