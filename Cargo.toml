@@ -25,7 +25,7 @@ edition = "2021"
 
 [dependencies]
 r2d2 = "^0.8.7"
-redis = { version = "^0.21.1", features = ['r2d2'] }
+redis = { version = "^0.23.0", features = ['r2d2'] }
 log = "^0.4"
 iron = "^0.6.1"
 urlencoded = "^0.6"
