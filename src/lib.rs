@@ -29,7 +29,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! spaceapi-server = "0.4"
+//! spaceapi-server = "0.7"
 //! ```
 //!
 //! Create a `main.rs`:
