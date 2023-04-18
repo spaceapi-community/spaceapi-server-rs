@@ -13,8 +13,9 @@ Possible log types:
 
 ### Unreleased
 
-- [changed] Update redis to 0.21 and remove r2d2\_redis (#110)
+- [changed] Update redis to 0.23 and remove r2d2\_redis (#110, #117)
 - [changed] Switch to Rust 2021 edition
+- [changed] Bump MSRV to 1.60
 
 ### v0.6.0  (2021-08-30)
 
