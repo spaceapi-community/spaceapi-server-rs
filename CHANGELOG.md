@@ -11,7 +11,7 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### Unreleased
+### v0.7.0 (2023-04-19)
 
 - [changed] Update redis to 0.23 and remove r2d2\_redis (#110, #117)
 - [changed] Switch to Rust 2021 edition
