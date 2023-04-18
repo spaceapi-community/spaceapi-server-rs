@@ -68,7 +68,7 @@ impl ReadHandler {
                     }
                     sensor_spec
                         .template
-                        .to_sensor(&value, &mut status_copy.sensors.as_mut().unwrap());
+                        .to_sensor(&value, status_copy.sensors.as_mut().unwrap());
                 }
 
                 // Value could not be read, do error logging
