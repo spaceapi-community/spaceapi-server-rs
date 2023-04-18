@@ -14,6 +14,7 @@ Possible log types:
 ### Unreleased
 
 - [changed] Update redis to 0.21 and remove r2d2\_redis (#110)
+- [changed] Switch to Rust 2021 edition
 
 ### v0.6.0  (2021-08-30)
 
