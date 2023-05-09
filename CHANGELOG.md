@@ -11,6 +11,10 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### Unreleased
+
+- [changed] Update spaceapi to 0.9. See [spaceapi changelog] for more details.
+
 ### v0.7.0 (2023-04-19)
 
 - [changed] Update redis to 0.23 and remove r2d2\_redis (#110, #117)
