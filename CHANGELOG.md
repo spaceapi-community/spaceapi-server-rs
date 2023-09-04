@@ -14,6 +14,7 @@ Possible log types:
 ### Unreleased
 
 - [changed] Update spaceapi to 0.9. See [spaceapi changelog] for more details.
+- [changed] Bump MSRV to 1.63
 
 ### v0.7.0 (2023-04-19)
 
