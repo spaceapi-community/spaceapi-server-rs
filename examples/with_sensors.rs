@@ -1,5 +1,7 @@
 use spaceapi_server::api;
-use spaceapi_server::api::sensors::{PeopleNowPresentSensorTemplate, TemperatureSensorTemplate};
+use spaceapi_server::api::sensors::{
+    PeopleNowPresentSensorTemplate, SensorMetadata, SensorMetadataWithLocation, TemperatureSensorTemplate,
+};
 use spaceapi_server::modifiers::StateFromPeopleNowPresent;
 use spaceapi_server::SpaceapiServerBuilder;
 
@@ -14,6 +16,7 @@ fn main() {
             address: Some("Spinnereistrasse 2, 8640 Rapperswil, Switzerland".into()),
             lat: 47.22936,
             lon: 8.82949,
+            timezone: None,
         })
         .contact(api::Contact {
             irc: Some("irc://freenode.net/#coredump".into()),
@@ -32,28 +35,30 @@ fn main() {
         .add_status_modifier(StateFromPeopleNowPresent)
         .add_sensor(
             PeopleNowPresentSensorTemplate {
-                location: Some("Hackerspace".into()),
-                name: None,
-                description: None,
-                names: None,
+                metadata: SensorMetadata {
+                    location: Some("Hackerspace".into()),
+                    ..Default::default()
+                },
             },
             "people_now_present".into(),
         )
         .add_sensor(
             TemperatureSensorTemplate {
+                metadata: SensorMetadataWithLocation {
+                    location: "Room 1".into(),
+                    ..Default::default()
+                },
                 unit: "°C".into(),
-                location: "Room 1".into(),
-                name: None,
-                description: None,
             },
             "temp_room1".into(),
         )
         .add_sensor(
             TemperatureSensorTemplate {
+                metadata: SensorMetadataWithLocation {
+                    location: "Room 2".into(),
+                    ..Default::default()
+                },
                 unit: "°C".into(),
-                location: "Room 2".into(),
-                name: None,
-                description: None,
             },
             "temp_room2".into(),
         )

@@ -42,6 +42,7 @@ fn main() {
             address: Some("Piazza Libertà 5/B, 34132 Trieste (TS), Italy".into()),
             lat: 45.656_652_6,
             lon: 13.773_387_2,
+            timezone: None,
         })
         .contact(api::Contact {
             email: Some("info@mittelab.org".into()),
