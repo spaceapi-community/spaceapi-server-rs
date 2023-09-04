@@ -11,7 +11,7 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
-### Unreleased
+### v0.8.0 (2023-09-04)
 
 - [changed] Update spaceapi to 0.9. See [spaceapi changelog] for more details.
 - [changed] Bump MSRV to 1.63

@@ -1,6 +1,6 @@
 [package]
 name = "spaceapi-server"
-version = "0.7.0"
+version = "0.8.0"
 documentation = "https://docs.rs/spaceapi-server"
 repository = "https://github.com/spaceapi-community/spaceapi-server-rs"
 license = "MIT OR Apache-2.0"
@@ -22,7 +22,7 @@ include = [
     "LICENSE-APACHE",
 ]
 edition = "2021"
-rust = "1.63"
+rust-version = "1.63"
 
 [dependencies]
 r2d2 = "^0.8.7"
